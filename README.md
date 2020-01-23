@@ -1,3 +1,18 @@
+
+# EECS 4481 Chat App Project
+
+# Run
+Run express server
+```
+nodemon server.js
+```
+
+Run dev-server
+```
+npm start
+```
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
