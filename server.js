@@ -18,10 +18,19 @@ io.on('connection', function(socket){
     console.log('a user disconnected')
   })
 
+
+  socket.on('clientJoined', (msg) => {
+    console.log('Creating room for:', msg)
+    socket.join(msg)
+  })
+
+
+
   socket.on('chat message', (msg) => {
     console.log("Received message: ", msg)
-    io.emit('chat message', msg);
+    io.to(msg.to).emit('chat message', `${msg.from}:${msg.message}`);
   })
+
 
 });
 
