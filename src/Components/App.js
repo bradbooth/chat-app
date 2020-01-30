@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import io from "socket.io-client";
 
+import SignUp from './SignUp/SignUp'
+import Login from './Login/Login'
+
 const ENDPOINT = 'http://localhost:4001'
 var socket;
 
@@ -66,40 +69,46 @@ class App extends Component {
 
   render() {
 
-
-
     return (
       <div style={{ textAlign: "center" }}>
-        <p>user:</p>
-        <input 
-          type="text"
-          value={this.state.user}
-          onChange={this.setUser}
-          onKeyDown={this.sendUser}
-        />
-        <br/>
 
-        <p>to:</p>
-        <input 
-          type="text"
-          value={this.state.to}
-          onChange={this.setTo}
-        />
-        <br/>
-
-
-        <p>message:</p>
-        <input 
-          type="text"
-          value={this.state.value}
-          onChange={this.handleChange}
-          onKeyDown={this.sendMessage}
-        />
-
+        <h1>Chat</h1>
         <div>
-          <p>Received from socket.io:</p>
-          <p>{this.state.chat}</p>
+        <p>user:</p>
+          <input 
+            type="text"
+            value={this.state.user}
+            onChange={this.setUser}
+            onKeyDown={this.sendUser}
+          />
+          <br/>
+
+          <p>to:</p>
+          <input 
+            type="text"
+            value={this.state.to}
+            onChange={this.setTo}
+          />
+          <br/>
+
+          <p>message:</p>
+          <input 
+            type="text"
+            value={this.state.value}
+            onChange={this.handleChange}
+            onKeyDown={this.sendMessage}
+          />
+
+          <div>
+            <p>Received from socket.io:</p>
+            <p>{this.state.chat}</p>
+          </div>
         </div>
+        <div>
+          <SignUp/>
+          <Login/>
+        </div>
+        
       </div>
     )
   }
