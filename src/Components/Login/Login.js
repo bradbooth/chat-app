@@ -28,7 +28,7 @@ export class Login extends Component {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {
-                console.log(res)
+                console.log(res.data)
                 this.setState({
                     username: '',
                     password: '',
