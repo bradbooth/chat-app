@@ -5,6 +5,10 @@ class Auth {
         this.authenticated = false
     }
 
+    setAuthenticated(val){
+        this.authenticated = val
+    }
+
     isAuthenticated(){
         this.authenticate(() => {
             // Do nothing
@@ -18,11 +22,7 @@ class Auth {
 
         console.log("Authenticating...")
 
-        Axios.get('/api/authenticated', {
-            headers: {
-                Authorization: "Bearer " + localStorage.getItem('token')
-            }
-        }).then( ( res ) => {
+        this.authenticatedRequest('/api/authenticated').then( ( res ) => {
 
         if (res.status === 200 ){
             this.authenticated = true;
@@ -40,9 +40,12 @@ class Auth {
         })
     }
 
-    callbackTest(err, res){
-        err()
-        res()
+    authenticatedRequest(url){
+        return Axios.get(url, {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem('token')
+            }
+        })
     }
 }
 

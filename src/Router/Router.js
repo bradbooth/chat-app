@@ -14,6 +14,13 @@ import Login from '../Components/Login/Login'
 import Auth from './Auth'
 
 export default class AppRouter extends Component {
+
+  signOut = () => {
+    localStorage.setItem('token', '')
+    Auth.setAuthenticated(false)
+    history.push('/login')
+  }
+
     render() {
 
       return (
@@ -28,6 +35,9 @@ export default class AppRouter extends Component {
               </li>
               <li>
                 <Link to="/signup">signup</Link>
+              </li>
+              <li>
+                <Link onClick={this.signOut}>signout</Link>
               </li>
             </ul>
           </nav>
@@ -96,6 +106,6 @@ class PrivateRoute extends Component {
     } else {
       return this.props.children
     }
-    
+
   }
 } 

@@ -22,6 +22,7 @@ app.use(passport.session());
 // Websockets
 io.on('connection', function(socket){
   console.log('a user connected');
+  console.log(io.sockets.clients())
 
   socket.on('disconnect', () => {
     console.log('a user disconnected')
@@ -40,6 +41,7 @@ io.on('connection', function(socket){
   })
 
 });
+
 
 // Create/Update user in database
 app.post('/api/createUser', (request, response) => {
@@ -60,7 +62,7 @@ app.post('/api/login',
     const token = jwt.sign(
       { _id: request.user._id }, 
       process.env.secret,
-      { expiresIn: '1m' });
+      { expiresIn: '1d' });
 
     return response.json({ 
       token,  
