@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import history from '../../History/History';
+import Auth from '../../Router/Auth'
+
 const axios = require('axios').default;
 
 export class Login extends Component {
@@ -7,8 +10,8 @@ export class Login extends Component {
         super(props);
 
         this.state = {
-            username: '',
-            password: '',
+            username: 'brad',
+            password: 'password',
             loggedIn: false
         }
     }
@@ -23,16 +26,16 @@ export class Login extends Component {
 
     submit = (e) => {
         if ( e.key === 'Enter' ){
-            console.log('submitting')
             axios.post('/api/login', {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {
-                console.log(res.data)
-                this.setState({
-                    username: '',
-                    password: '',
-                    loggedIn: res.data.valid
+                localStorage.setItem('token', res.data.token)
+                Auth.authenticate( () => {
+                    console.log("Error logging in")
+                }, () => {
+                    console.log('Authenticated, ... redirecting')
+                    history.push(res.data.redirect)
                 })
             }).catch( err => {
                 console.log(err)
@@ -42,7 +45,7 @@ export class Login extends Component {
 
     render() {
         return (
-            <div >
+            <div style={{ textAlign: "center" }}>
             <h1>Log in</h1>
                 <label htmlFor="username">Username</label>
                 <input 
@@ -60,7 +63,7 @@ export class Login extends Component {
                     onChange={this.setPassword}
                     onKeyDown={this.submit}
                 />
-                { this.state.loggedIn && <p>Successfully logged in</p>}       
+
             </div>
         )
     }

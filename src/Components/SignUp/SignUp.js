@@ -41,7 +41,7 @@ export class SignUp extends Component {
 
     render() {
         return (
-            <div >
+            <div style={{ textAlign: "center" }}>
             <h1>Sign up</h1>
                 <label htmlFor="username">Username</label>
                 <input 

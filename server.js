@@ -1,5 +1,6 @@
 const dotenv = require('dotenv').config()
 const db = require('./database')
+const passport = require('./passport').passport
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -7,6 +8,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const http = require('http').createServer(app)
 const io = require("socket.io")(http, { origins: '*:*'});
+const jwt = require('jsonwebtoken');
 
 const port = 4001
 const publicPath = path.join(__dirname, 'build');
@@ -14,6 +16,8 @@ const publicPath = path.join(__dirname, 'build');
 app.use(cors())
 app.use(bodyParser.json())
 app.use(express.static(publicPath));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Websockets
 io.on('connection', function(socket){
@@ -37,7 +41,6 @@ io.on('connection', function(socket){
 
 });
 
-
 // Create/Update user in database
 app.post('/api/createUser', (request, response) => {
 
@@ -49,20 +52,30 @@ app.post('/api/createUser', (request, response) => {
   })
 })
 
-// Login matches credentials in database
-app.post('/api/login', (request, response) => {
+app.post('/api/login', 
+  passport.authenticate('local'),
+  (request, response) => {
+    // console.log(request.user, process.env.secret)
+    // Create JWT Token signed with username
+    const token = jwt.sign(
+      { _id: request.user._id }, 
+      process.env.secret,
+      { expiresIn: '1m' });
 
-  const username = request.body.username
-  const password = request.body.password
-
-  db.verifyUser(username, password, (err, res) => {
-    response.send({
-      valid: res
-    })
-  })
+    return response.json({ 
+      token,  
+      redirect: "/chat" 
+    });
 })
 
-// Use passport to authenticate eventually
+app.get('/api/authenticated',
+  passport.authenticate('jwt', {session: false}), 
+  (request, response) => {
+
+    console.log('Server jwt authentication successful')
+    response.sendStatus(200)
+  }
+)
 
 // Serve web pages
 app.get('*', (req, res) => {

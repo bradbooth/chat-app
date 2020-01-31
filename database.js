@@ -12,6 +12,7 @@ const client = new MongoClient(uri, {
 });
 
 var collection
+var ObjectId = require('mongodb').ObjectId; 
 
 client.connect(err => {
     assert.equal(null, err);
@@ -44,14 +45,37 @@ const verifyUser = (username, password, callback) => {
             callback('Error: no user found', false)
             throw new Error("User not found")
         } else {
-            console.log(res)
-            bcrypt.compare(password, res.password, function(err, res) {
-                callback(err, res)
+
+            bcrypt.compare(password, res.password, function(err, valid) {
+                if ( valid ){
+                    callback(null, res)
+                } else {
+                    callback(err, null)
+                }
+                
             });
         }
+    }).catch( err => {
+        console.log("Error:", err)
     })
-    
+
+}
+
+const findUserById = ( id, callback )=> {
+    collection.findOne({
+        _id: new ObjectId(id)
+    }).then ( (res) => {
+        if ( !res ) {
+            callback('Error: user id not found', false)
+            throw new Error("User id not found")
+        } else {
+            callback( res )
+        }
+    }).catch( err => {
+        console.log(err)
+    })
 }
 
 exports.createNewUser = createNewUser;
 exports.verifyUser = verifyUser;
+exports.findUserById = findUserById;
