@@ -3,43 +3,29 @@ import store from '../Redux/Store'
 import { setAuthenticated } from '../Redux/Actions/auth'
 
 class Auth {
-    constructor(){
-        this.authenticated = false
-    }
 
-    setAuthenticated(val){
-        this.authenticated = val
-    }
-
-    isAuthenticated(){
-        this.authenticate(() => {
-            // Do nothing
-        }, () => {
-            // Do nothing
-        })
-        return this.authenticated === true
+    signOut(){
+        localStorage.setItem('token', '')
+        store.dispatch(setAuthenticated(false))
     }
 
     authenticate(error, result ){
 
-        console.log("Authenticating...")
+        console.log("Checking Authorization...")
 
         this.authenticatedRequest('/api/authenticated').then( ( res ) => {
 
         if (res.status === 200 ){
-            this.authenticated = true;
             store.dispatch(setAuthenticated(true))
             console.log('Authorization successful')
             result()
         } else {
-            this.authenticated = false
-            localStorage.setItem('token', '')
+            this.signOut()
             error()
         }
         }).catch( err => {
             console.error('err', err)
-            this.authenticated = false
-            localStorage.setItem('token', '')
+            this.signOut()
         })
     }
 

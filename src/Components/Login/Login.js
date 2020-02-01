@@ -32,10 +32,11 @@ export class Login extends Component {
                 password: this.state.password
             }).then( res => {
                 localStorage.setItem('token', res.data.token)
+
                 Auth.authenticate( () => {
                     console.log("Error logging in")
                 }, () => {
-                    console.log('Authenticated, ... redirecting')
+                    console.log('Authenticated... redirecting')
                     this.props.updateToken(res.data.token)
                     history.push(res.data.redirect)
                 })
@@ -65,18 +66,10 @@ export class Login extends Component {
                     onChange={this.setPassword}
                     onKeyDown={this.submit}
                 />
-
             </div>
         )
     }
 }
-
-
-const mapStateToProps = (state) => {
-    return {
-    
-    }
-};
 
 const mapDispatchToProps = (dispatch) => ({
     updateToken: (token) => dispatch(updateToken(token))

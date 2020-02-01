@@ -18,12 +18,12 @@ import Auth from './Auth'
 class AppRouter extends Component {
 
   signOut = () => {
-    localStorage.setItem('token', '')
-    Auth.setAuthenticated(false)
-    history.push('/login')
+    Auth.signOut()
   }
 
   render() {
+
+    const { isAuthenticated} = this.props.authentication
 
     return (
       <Router history={history} >
@@ -33,14 +33,18 @@ class AppRouter extends Component {
               <Link to="/login">login</Link>
             </li>
             <li>
-              <Link to="/chat">chat</Link>
-            </li>
-            <li>
               <Link to="/signup">signup</Link>
             </li>
-            <li>
-              <a href="/login" onClick={this.signOut}>signout</a>
-            </li>
+            { isAuthenticated &&
+              <div>
+                <li>
+                  <Link to="/chat">chat</Link>
+                </li>
+                <li>
+                  <a href="/login" onClick={this.signOut}>signout</a>
+                </li>
+              </div>
+            }
           </ul>
         </nav>
 
