@@ -1,6 +1,6 @@
 const dotenv = require('dotenv').config()
-const db = require('./database')
-const passport = require('./passport').passport
+const db = require('./server/database')
+const passport = require('./server/passport').passport
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -21,8 +21,7 @@ app.use(passport.session());
 
 // Websockets
 io.on('connection', function(socket){
-  console.log('a user connected');
-  console.log(io.sockets.clients())
+  // console.log('a user connected');
 
   socket.on('disconnect', () => {
     console.log('a user disconnected')
@@ -42,7 +41,6 @@ io.on('connection', function(socket){
 
 });
 
-
 // Create/Update user in database
 app.post('/api/createUser', (request, response) => {
 
@@ -54,22 +52,26 @@ app.post('/api/createUser', (request, response) => {
   })
 })
 
+// 
 app.post('/api/login', 
   passport.authenticate('local'),
   (request, response) => {
-    // console.log(request.user, process.env.secret)
-    // Create JWT Token signed with username
+
+    // Create JWT Token with user id
     const token = jwt.sign(
       { _id: request.user._id }, 
       process.env.secret,
       { expiresIn: '1d' });
 
     return response.json({ 
-      token,  
-      redirect: "/chat" 
+      token,
+      user: {
+        username: request.user.username,
+      }
     });
 })
 
+// Verify if currently authenticated
 app.get('/api/authenticated',
   passport.authenticate('jwt', {session: false}), 
   (request, response) => {
@@ -78,6 +80,18 @@ app.get('/api/authenticated',
     response.sendStatus(200)
   }
 )
+
+app.get('/api/getOnlineUsers',
+  passport.authenticate('jwt', {session: false}), 
+  (request, response) => {
+    console.log('getOnlineUsers', io.sockets.clients())
+    response.json({
+      
+    })
+  }
+)
+
+
 
 // Serve web pages
 app.get('*', (req, res) => {

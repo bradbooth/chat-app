@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { updateToken } from "../../Redux/Actions/auth"
+import { updateUser } from "../../Redux/Actions/user"
 import history from '../../History/History';
-import Auth from '../../Router/Auth'
+import Auth from '../../Auth/Auth'
 
 const axios = require('axios').default;
 
@@ -31,14 +32,18 @@ export class Login extends Component {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {
+
                 localStorage.setItem('token', res.data.token)
 
                 Auth.authenticate( () => {
                     console.log("Error logging in")
                 }, () => {
                     console.log('Authenticated... redirecting')
+
                     this.props.updateToken(res.data.token)
-                    history.push(res.data.redirect)
+                    this.props.updateUser({...res.data.user})
+
+                    history.push('/chat')
                 })
             }).catch( err => {
                 console.log(err)
@@ -72,7 +77,8 @@ export class Login extends Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    updateToken: (token) => dispatch(updateToken(token))
+    updateToken: (token) => dispatch(updateToken(token)),
+    updateUser: (user) => dispatch(updateUser(user))
 });
 
 export default connect(null, mapDispatchToProps)(Login);

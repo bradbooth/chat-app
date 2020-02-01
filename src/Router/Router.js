@@ -4,8 +4,7 @@ import {
   Router,
   Switch,
   Route,
-  Link,
-  Redirect,
+  Link
 } from "react-router-dom";
 import history from '../History/History';
 import PrivateRoute from './PrivateRoute'
@@ -13,7 +12,7 @@ import PrivateRoute from './PrivateRoute'
 import Chat from '../Components/Chat/Chat'
 import SignUp from '../Components/SignUp/SignUp'
 import Login from '../Components/Login/Login'
-import Auth from './Auth'
+import Auth from '../Auth/Auth'
 
 class AppRouter extends Component {
 
