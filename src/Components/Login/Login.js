@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { updateToken } from "../../Redux/Actions/auth"
 import history from '../../History/History';
 import Auth from '../../Router/Auth'
 
@@ -8,7 +10,6 @@ export class Login extends Component {
 
     constructor(props) {
         super(props);
-
         this.state = {
             username: 'brad',
             password: 'password',
@@ -35,6 +36,7 @@ export class Login extends Component {
                     console.log("Error logging in")
                 }, () => {
                     console.log('Authenticated, ... redirecting')
+                    this.props.updateToken(res.data.token)
                     history.push(res.data.redirect)
                 })
             }).catch( err => {
@@ -69,4 +71,15 @@ export class Login extends Component {
     }
 }
 
-export default Login;
+
+const mapStateToProps = (state) => {
+    return {
+    
+    }
+};
+
+const mapDispatchToProps = (dispatch) => ({
+    updateToken: (token) => dispatch(updateToken(token))
+});
+
+export default connect(null, mapDispatchToProps)(Login);

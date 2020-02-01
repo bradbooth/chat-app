@@ -1,4 +1,6 @@
 import Axios from "axios";
+import store from '../Redux/Store'
+import { setAuthenticated } from '../Redux/Actions/auth'
 
 class Auth {
     constructor(){
@@ -26,6 +28,7 @@ class Auth {
 
         if (res.status === 200 ){
             this.authenticated = true;
+            store.dispatch(setAuthenticated(true))
             console.log('Authorization successful')
             result()
         } else {
