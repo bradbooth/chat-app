@@ -12,26 +12,30 @@ const jwt = require('jsonwebtoken');
 
 const port = 4001
 const publicPath = path.join(__dirname, 'build');
+const routes = require('./server/routes/routes');
+
 
 app.use(cors())
 app.use(bodyParser.json())
 app.use(express.static(publicPath));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/', routes);
 
 
 // TODO - Move websockets to own file
+const AUTHORIZED = 'authorized'
+
 let users = []
 let authorizedUsers = []
 
 const updateUsers = () => {
-  authorizedUsers.forEach( usr => {
-    io.to(usr.socketId).emit('users', {
-      users,
-      authorizedUsers
-    })
+  io.to(AUTHORIZED).emit('users', {
+    users,
+    authorizedUsers
   })
 }
+
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -64,66 +68,29 @@ io.on('connection', (socket) => {
         authorizedUsers.push({
           socketId: socket.id
         })
+        socket.join(AUTHORIZED)
       }
     })
-    
-    socket.join(msg)
+
+    // Respond with socket-id
+    io.to(socket.id).emit('joined', {
+      id: socket.id
+    });
+
     updateUsers()
   })
 
-});
-
-// TODO - Move routes to own file
-
-// Create/Update user in database
-app.post('/api/createUser', (request, response) => {
-
-  const username = request.body.username
-  const password = request.body.password
-
-  db.createNewUser(username, password, (err, res) => {
-    response.send('success')
+  socket.on('send-message', (msg) => {
+    io.to(msg.to).emit('receive-message', msg)
+    io.to(msg.from).emit('receive-message', msg)
   })
-})
 
-// 
-app.post('/api/login', 
-  passport.authenticate('local'),
-  (request, response) => {
+  socket.on('assign-user', (msg) => {
+    console.log(msg)
+    io.to(msg.user).emit('assigned-agent', msg.agent)
+  })
 
-    // Create JWT Token with user id
-    const token = jwt.sign(
-      { _id: request.user._id }, 
-      process.env.secret,
-      { expiresIn: '1d' });
-
-    return response.json({ 
-      token,
-      user: {
-        username: request.user.username,
-      }
-    });
-})
-
-// Verify if currently authenticated
-app.get('/api/authenticated',
-  passport.authenticate('jwt', {session: false}), 
-  (request, response) => {
-
-    console.log('Server jwt authentication successful')
-    response.sendStatus(200)
-  }
-)
-
-app.get('/api/getOnlineUsers',
-  passport.authenticate('jwt', {session: false}), 
-  (request, response) => {
-
-    response.json({
-      users
-    })
-  }
-)
+});
 
 // Serve web pages
 app.get('*', (req, res) => {

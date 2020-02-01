@@ -11,7 +11,12 @@ class AnonChat extends Component {
       super();
 
       this.state = {
-        username: Math.floor((Math.random() * 10) + 1),
+        chat: [],
+        message: {
+          to: '',
+          from: '',
+          value: ''
+        }
       };
     }
   
@@ -23,14 +28,62 @@ class AnonChat extends Component {
           chat: [...this.state.chat, msg]
         })
       })
+
+      socket.on( 'receive-message' , (msg) => {
+        console.log('receive-message', msg)
+        this.setState({
+          chat: [ ...this.state.chat, msg.value ],
+        })
+      })
+
+      socket.on( 'assigned-agent' , (msg) => {
+        this.setState({
+          message: {
+            ...this.state.message,
+            to: msg
+          }
+        })
+      })
       
       socket.emit('join', {
         username: this.state.username
-      })      
+      })
+      
+      socket.on('joined', (msg) => {
+        console.log(`Your id is ${msg.id}`)
+        this.setState({
+          message: {
+            ...this.state.message,
+            from: msg.id
+          }
+        })
+      })   
     }
 
     componentWillUnmount = () => {
       socket.close()
+    }
+
+    setMessage = (e) => {
+      this.setState({
+        message: {
+          ...this.state.message,
+          value: e.target.value
+        }})
+    }
+
+    sendMessage = (e) => {
+      if ( e.key === 'Enter'){
+        console.log('send:' + this.state.message.value)
+        console.log(this.state)
+        socket.emit( 'send-message', this.state.message )
+        this.setState({
+          message: {
+            ...this.state.message,
+            value: ''
+          }
+        }, console.log(this.state))
+      }
     }
 
     render() {
@@ -39,9 +92,16 @@ class AnonChat extends Component {
         <div style={{ textAlign: "center" }}>
   
           <h1>Anonymous Chat</h1>
-          <p>Username: {this.state.username} </p>
-          
-          
+          <p>To: {this.state.message.to} </p>
+          <input 
+            type="text"
+            placeholder="Send message..."
+            value={ this.state.message.value }
+            onChange={ this.setMessage }
+            onKeyDown={ this.sendMessage }
+          />
+          { this.state.chat.map( (msg, key) => <p key={key}>{msg}</p>) }
+
         </div>
       )
     }
