@@ -19,27 +19,61 @@ app.use(express.static(publicPath));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Websockets
-io.on('connection', function(socket){
-  // console.log('a user connected');
 
-  socket.on('disconnect', () => {
-    console.log('a user disconnected')
+// TODO - Move websockets to own file
+let users = []
+let authorizedUsers = []
+
+const updateUsers = () => {
+  authorizedUsers.forEach( usr => {
+    io.to(usr.socketId).emit('users', {
+      users,
+      authorizedUsers
+    })
+  })
+}
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  socket.on('disconnect', (msg) => {
+
+    users = users.filter( usr => usr.socketId != socket.id )
+    authorizedUsers = authorizedUsers.filter( usr => usr.socketId != socket.id )
+    
+    updateUsers()
+    console.log('a user disconnected:', socket.id)
   })
 
-  // Create a room per user
-  socket.on('clientJoined', (msg) => {
+  // Keep track of users who join with/out authorization
+  socket.on('join', (msg) => {
     console.log('Creating room for:', msg)
-    socket.join(msg)
-  })
 
-  // Send chat message
-  socket.on('chat message', (msg) => {
-    console.log("Received message: ", msg)
-    io.to(msg.to).emit('chat message', `${msg.from}:${msg.message}`);
+    jwt.verify(
+      msg.jwtToken, 
+      process.env.secret, 
+      (err, decoded) => {
+
+      if ( err ){
+        console.log('Unauthorized')
+        users.push({
+          socketId: socket.id
+        })
+      } else {
+        console.log('Authorized: ', decoded)
+        authorizedUsers.push({
+          socketId: socket.id
+        })
+      }
+    })
+    
+    socket.join(msg)
+    updateUsers()
   })
 
 });
+
+// TODO - Move routes to own file
 
 // Create/Update user in database
 app.post('/api/createUser', (request, response) => {
@@ -84,14 +118,12 @@ app.get('/api/authenticated',
 app.get('/api/getOnlineUsers',
   passport.authenticate('jwt', {session: false}), 
   (request, response) => {
-    console.log('getOnlineUsers', io.sockets.clients())
+
     response.json({
-      
+      users
     })
   }
 )
-
-
 
 // Serve web pages
 app.get('*', (req, res) => {

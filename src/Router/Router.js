@@ -9,7 +9,8 @@ import {
 import history from '../History/History';
 import PrivateRoute from './PrivateRoute'
 
-import Chat from '../Components/Chat/Chat'
+import AnonChat from '../Components/Chat/AnonChat'
+import AuthChat from '../Components/Chat/AuthChat'
 import SignUp from '../Components/SignUp/SignUp'
 import Login from '../Components/Login/Login'
 import Auth from '../Auth/Auth'
@@ -34,10 +35,13 @@ class AppRouter extends Component {
             <li>
               <Link to="/signup">signup</Link>
             </li>
+            <li>
+              <Link to="/chat"> anonymous chat</Link>
+            </li>
             { isAuthenticated &&
               <div>
                 <li>
-                  <Link to="/chat">chat</Link>
+                  <Link to="/authchat">authenticated chat</Link>
                 </li>
                 <li>
                   <a href="/login" onClick={this.signOut}>signout</a>
@@ -48,9 +52,12 @@ class AppRouter extends Component {
         </nav>
 
         <Switch >
-          <PrivateRoute path="/chat">
-            <Chat />
+          <PrivateRoute path="/authchat">
+            <AuthChat />
           </PrivateRoute>
+          <Route path="/chat">
+            <AnonChat />
+          </Route>
           <Route path="/signup">
             <SignUp />
           </Route>

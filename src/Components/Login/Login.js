@@ -33,7 +33,8 @@ export class Login extends Component {
                 password: this.state.password
             }).then( res => {
 
-                localStorage.setItem('token', res.data.token)
+                // localStorage.setItem('token', res.data.token)
+                this.props.updateToken(res.data.token)
 
                 Auth.authenticate( () => {
                     console.log("Error logging in")
@@ -43,7 +44,7 @@ export class Login extends Component {
                     this.props.updateToken(res.data.token)
                     this.props.updateUser({...res.data.user})
 
-                    history.push('/chat')
+                    history.push('/authchat')
                 })
             }).catch( err => {
                 console.log(err)

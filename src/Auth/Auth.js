@@ -32,7 +32,9 @@ class Auth {
     authenticatedRequest(url){
         return Axios.get(url, {
             headers: {
-                Authorization: "Bearer " + localStorage.getItem('token')
+                Authorization: "Bearer " + store.getState().authentication.jwtToken
+                
+                // Authorization: "Bearer " + localStorage.getItem('token')
             }
         })
     }
