@@ -81,8 +81,16 @@ io.on('connection', (socket) => {
   })
 
   socket.on('send-message', (msg) => {
-    io.to(msg.to).emit('receive-message', msg)
-    io.to(msg.from).emit('receive-message', msg)
+
+    const message = {
+      sender: msg.from,
+      recipient: msg.to,
+      message: msg.value
+    }
+
+
+    io.to(msg.to).emit('receive-message', message)
+    io.to(msg.from).emit('receive-message', message)
   })
 
   socket.on('assign-user', (msg) => {

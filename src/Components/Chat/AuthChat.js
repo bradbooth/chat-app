@@ -38,10 +38,10 @@ class AuthChat extends Component {
         })
       })
 
-      socket.on( 'receive-message' , (msg) => {
-        console.log('receive-message', msg)
+      socket.on( 'receive-message' , (res) => {
+        console.log('receive-message', res)
         this.setState({
-          chat: [ ...this.state.chat, msg.value ]
+          chat: [ ...this.state.chat, res ]
         })
       })
       
@@ -99,16 +99,24 @@ class AuthChat extends Component {
 
     sendMessage = (e) => {
       if ( e.key === 'Enter'){
-        console.log('send:' + this.state.message.value)
-        console.log(this.state)
         socket.emit( 'send-message', this.state.message )
         this.setState({
           message: {
             ...this.state.message,
             value: ''
           }
-        }, console.log(this.state))
+        })
       }
+    }
+
+
+    getChat = () => {
+      // Only show messages relating to currently selected recipent
+      const messages = this.state.chat.filter( 
+        msg => msg.sender    === this.state.message.to ||
+               msg.recipient === this.state.message.to
+      )        
+      return messages.map( (msg, key) => <p key={key}>{msg.message}</p>)
     }
 
     render() {
@@ -134,7 +142,7 @@ class AuthChat extends Component {
               onChange={ this.setMessage }
               onKeyDown={ this.sendMessage }
             />
-            { this.state.chat.map( (msg, key) => <p key={key}>{msg}</p>) }
+            { this.getChat() }
 
         </div>
       )

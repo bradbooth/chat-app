@@ -29,10 +29,10 @@ class AnonChat extends Component {
         })
       })
 
-      socket.on( 'receive-message' , (msg) => {
-        console.log('receive-message', msg)
+      socket.on( 'receive-message' , (res) => {
+        console.log('receive-message', res)
         this.setState({
-          chat: [ ...this.state.chat, msg.value ],
+          chat: [ ...this.state.chat, res ]
         })
       })
 
@@ -86,6 +86,11 @@ class AnonChat extends Component {
       }
     }
 
+    getChat = () => {
+ 
+      return this.state.chat.map( (msg, key) => <p key={key}>{msg.message}</p>)
+    }
+
     render() {
   
       return (
@@ -100,7 +105,7 @@ class AnonChat extends Component {
             onChange={ this.setMessage }
             onKeyDown={ this.sendMessage }
           />
-          { this.state.chat.map( (msg, key) => <p key={key}>{msg}</p>) }
+          { this.getChat() }
 
         </div>
       )
