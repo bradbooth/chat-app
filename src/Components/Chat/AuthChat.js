@@ -54,10 +54,6 @@ class AuthChat extends Component {
         console.log(`Your id is ${msg.id}`)
         this.setState({
           id: msg.id,
-          message: {
-            ...this.state.message,
-            from: msg.id
-          }
         })
       })
       

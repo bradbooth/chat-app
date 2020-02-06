@@ -18,7 +18,6 @@ import Auth from '../Auth/Auth'
 
 import './AppRouter.css'; 
 
-
 class AppRouter extends Component {
 
   signOut = () => {
@@ -31,31 +30,9 @@ class AppRouter extends Component {
 
     return (
       <Router history={history} >
-        {/* <nav>
-          <ul id="horizontal-list">
-            <li>
-              <Link to="/login">login</Link>
-            </li>
-            <li>
-              <Link to="/signup">signup</Link>
-            </li>
-            <li>
-              <Link to="/chat"> anonymous chat</Link>
-            </li>
-            { isAuthenticated &&
-              <div>
-                <li>
-                  <Link to="/authchat">authenticated chat</Link>
-                </li>
-                <li>
-                  <a href="/login" onClick={this.signOut}>signout</a>
-                </li>
-              </div>
-            }
-          </ul>
-        </nav> */}
+
         <Navbar bg="light" expand="lg">
-          <Navbar.Brand href="#home">EECS 4481 - Chat App</Navbar.Brand>
+          <Navbar.Brand href="">EECS 4481 - Chat App</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
