@@ -4,8 +4,9 @@ import {
   Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
+import { Navbar, Nav } from 'react-bootstrap';
+
 import history from '../History/History';
 import PrivateRoute from './PrivateRoute'
 
@@ -14,6 +15,9 @@ import AuthChat from '../Components/Chat/AuthChat'
 import SignUp from '../Components/SignUp/SignUp'
 import Login from '../Components/Login/Login'
 import Auth from '../Auth/Auth'
+
+import './AppRouter.css'; 
+
 
 class AppRouter extends Component {
 
@@ -27,8 +31,8 @@ class AppRouter extends Component {
 
     return (
       <Router history={history} >
-        <nav>
-          <ul>
+        {/* <nav>
+          <ul id="horizontal-list">
             <li>
               <Link to="/login">login</Link>
             </li>
@@ -49,7 +53,20 @@ class AppRouter extends Component {
               </div>
             }
           </ul>
-        </nav>
+        </nav> */}
+        <Navbar bg="light" expand="lg">
+          <Navbar.Brand href="#home">EECS 4481 - Chat App</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <Nav.Link href="/login">Login</Nav.Link>
+              <Nav.Link href="/signup">Sign up</Nav.Link>
+              <Nav.Link href="/chat">Chat</Nav.Link>
+              { isAuthenticated && <Nav.Link href="/authchat">Authenticated Chat</Nav.Link> }
+              { isAuthenticated && <Nav.Link href="/login" onClick={this.signOut}>Sign out</Nav.Link> }
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
 
         <Switch >
           <PrivateRoute path="/authchat">

@@ -2,7 +2,10 @@
 
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Container, Row, Col } from 'react-bootstrap';
+import Chat from './Chat'
 import io from "socket.io-client";
+import './AuthChat.css'; 
 
 var socket;
 
@@ -19,11 +22,8 @@ class AuthChat extends Component {
         users: [],
         authUsers: [],
         chat: [],
-        message: {
-          to: '',
-          from: '',
-          value: ''
-        }
+        id: '',
+        selectedUser: ''
       };
     }
   
@@ -53,6 +53,7 @@ class AuthChat extends Component {
       socket.on('joined', (msg) => {
         console.log(`Your id is ${msg.id}`)
         this.setState({
+          id: msg.id,
           message: {
             ...this.state.message,
             from: msg.id
@@ -68,15 +69,12 @@ class AuthChat extends Component {
 
     setUser = (e, socketId) => {
       socket.emit('assign-user', {
-        agent: this.state.message.from,
+        agent: this.state.id,
         user: socketId
       })
 
       this.setState({
-        message: {
-          ...this.state.message,
-          to: socketId
-        }
+        selectedUser: socketId
       })
     }
 
@@ -89,62 +87,46 @@ class AuthChat extends Component {
       )
     }
 
-    setMessage = (e) => {
-      this.setState({
-        message: {
-          ...this.state.message,
-          value: e.target.value
-        }})
-    }
-
-    sendMessage = (e) => {
-      if ( e.key === 'Enter'){
-        socket.emit( 'send-message', this.state.message )
-        this.setState({
-          message: {
-            ...this.state.message,
-            value: ''
-          }
-        })
-      }
-    }
-
-
-    getChat = () => {
-      // Only show messages relating to currently selected recipent
-      const messages = this.state.chat.filter( 
-        msg => msg.sender    === this.state.message.to ||
-               msg.recipient === this.state.message.to
-      )        
-      return messages.map( (msg, key) => <p key={key}>{msg.message}</p>)
+    sendMessage = (msg) => {
+        socket.emit( 'send-message', msg )
     }
 
     render() {
   
       return (
-        <div style={{ textAlign: "center" }}>
+        <Container fluid>
+          <Row className="auth-chat-container">
+            <Col xs={4} className="auth-chat-sidebar">
+              <div className="auth-chat-authenticated-users">
+                Auth users
+                <ul>
+                  { this.getUserList(this.state.authUsers) }
+                </ul>
+              </div>
+              <div className="auth-chat-anonymous-users">
+                Anon users
+                <ul>
+                  { this.getUserList(this.state.users) }
+                </ul>
+              </div>
+            </Col>
 
-            <h1>Authenticated Chat</h1>
-            <p>Anonymous Users Online:</p>
-            <ul>
-              { this.getUserList(this.state.users) }
-            </ul>
-            <p>Authenticated Users Online:</p>
-            <ul>
-              { this.getUserList(this.state.authUsers) }
-            </ul>
-            <br/>
-            <p>To: {this.state.message.to} </p>
-            <input 
-              type="text"
-              placeholder="Send message..."
-              value={ this.state.message.value }
-              onChange={ this.setMessage }
-              onKeyDown={ this.sendMessage }
-            />
-            { this.getChat() }
-
-        </div>
+            <Col xs={8} className="auth-chat-window">
+              <Row>
+                <Col className="chat-header">
+                  <h3>Chatting with: {this.state.selectedUser} </h3>
+                </Col>
+              </Row>
+                <Chat
+                  className="chat-messages-container"
+                  to={ this.state.selectedUser }
+                  from={ this.state.id }
+                  chat={ this.state.chat }
+                  sendMessage={ this.sendMessage }
+                />
+            </Col>
+          </Row>
+        </Container>
       )
     }
   }

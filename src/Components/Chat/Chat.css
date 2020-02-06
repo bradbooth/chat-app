@@ -1,0 +1,16 @@
+.chat-input {
+    width: 100%;
+}
+
+.chat-input-container {
+    bottom: 0px;
+    background-color: rgb(251, 251, 251);
+    padding: 10px;
+}
+
+.chat-messages-container {
+    flex: auto;
+    overflow-y: scroll;
+    max-height: 50vh;
+    height: 370px;
+}

@@ -1,0 +1,9 @@
+ul#horizontal-list {
+
+    text-align: center;
+}
+
+ul#horizontal-list li {
+    display: inline;
+    padding: 0px 10px;
+}

@@ -1,0 +1,14 @@
+.auth-chat-container {
+    height: 500px;
+}
+
+.auth-chat-sidebar {
+    background-color: rgb(243, 243, 243);
+    /* border: solid black 1px; */
+}
+
+.auth-chat-window {
+    background-color: rgb(251, 251, 251);
+    display: flex;
+    flex-flow: column nowrap;
+}

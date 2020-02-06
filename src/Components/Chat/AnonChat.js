@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import io from "socket.io-client";
+import Chat from './Chat'
 
 var socket;
 
@@ -72,18 +73,10 @@ class AnonChat extends Component {
         }})
     }
 
-    sendMessage = (e) => {
-      if ( e.key === 'Enter'){
-        console.log('send:' + this.state.message.value)
-        console.log(this.state)
-        socket.emit( 'send-message', this.state.message )
-        this.setState({
-          message: {
-            ...this.state.message,
-            value: ''
-          }
-        }, console.log(this.state))
-      }
+
+
+    sendMessage = (msg) => {
+      socket.emit( 'send-message', msg )
     }
 
     getChat = () => {
@@ -94,9 +87,18 @@ class AnonChat extends Component {
     render() {
   
       return (
-        <div style={{ textAlign: "center" }}>
-  
-          <h1>Anonymous Chat</h1>
+        <div>
+          <h3 style={{textAlign: "center"}}>
+            {this.state.message.to ? 'Connected' : 'Waiting for an agent...'}
+          </h3>
+          <Chat
+            className="chat-messages-container"
+            to={ this.state.message.to }
+            from={ this.state.message.from }
+            chat={ this.state.chat }
+            sendMessage={ this.sendMessage }
+          />
+          {/* <h1>Anonymous Chat</h1>
           <p>To: {this.state.message.to} </p>
           <input 
             type="text"
@@ -105,7 +107,7 @@ class AnonChat extends Component {
             onChange={ this.setMessage }
             onKeyDown={ this.sendMessage }
           />
-          { this.getChat() }
+          { this.getChat() } */}
 
         </div>
       )
