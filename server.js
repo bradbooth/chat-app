@@ -29,11 +29,42 @@ const AUTHORIZED = 'authorized'
 let users = []
 let authorizedUsers = []
 
+const printAllUsers = () => {
+  console.log(
+    "Auth:", authorizedUsers, '\n',
+    "Users:", users
+  )
+}
+
 const updateUsers = () => {
   io.to(AUTHORIZED).emit('users', {
     users,
     authorizedUsers
   })
+}
+
+/**
+ * Attempt to assign next avaliable agent to a user
+ */
+const assignNextAgent = () => {
+  // Loop through all agents, and assign the one with
+  // the least amount of clients? Or just 1 at a time?
+  const nextAgentIndex = authorizedUsers.findIndex( x => x.assignedUser === null )
+  const nextUserIndex  = users.findIndex( x => x.assignedAgent == null )
+
+  // If theres an avaliable agent and a waiting user
+  if ( nextAgentIndex >= 0 && nextUserIndex >= 0 ){
+
+    const usrSocketId = users[nextUserIndex].socketId
+    const agtSocketId = authorizedUsers[nextAgentIndex].socketId
+
+    authorizedUsers[nextAgentIndex].assignedUser = usrSocketId
+    users[nextUserIndex].assignedAgent = agtSocketId
+
+    io.to(usrSocketId).emit('assigned-agent', { socketId: agtSocketId } )
+    io.to(agtSocketId).emit('assigned-user',  { socketId: usrSocketId } )
+
+  }
 }
 
 
@@ -42,10 +73,32 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', (msg) => {
 
+    // Remove the user/agent from our active users/agents list
     users = users.filter( usr => usr.socketId != socket.id )
     authorizedUsers = authorizedUsers.filter( usr => usr.socketId != socket.id )
     
+    // If the user was assigned an agent, remove the assignment
+    authorizedUsers = authorizedUsers.map( agent => {
+      if ( agent.assignedUser === socket.id ){
+        agent.assignedUser = null
+      }
+      return agent
+    })
+
+    // If the socket was an agent, remove the assigned agent from user
+    users = users.map( user => {
+      if ( user.assignedAgent === socket.id ){
+        user.assignedAgent = null
+        // Notify the user that agent disconnected
+        io.to(user.socketId).emit('assigned-agent', { socketId: null })
+      }
+      return user
+    })
+
+    assignNextAgent()
+    printAllUsers()
     updateUsers()
+
     console.log('a user disconnected:', socket.id)
   })
 
@@ -61,15 +114,21 @@ io.on('connection', (socket) => {
       if ( err ){
         console.log('Unauthorized')
         users.push({
-          socketId: socket.id
+          socketId: socket.id,
+          assignedAgent: null
         })
       } else {
         console.log('Authorized: ', decoded)
         authorizedUsers.push({
-          socketId: socket.id
+          socketId: socket.id,
+          assignedUser: null
         })
         socket.join(AUTHORIZED)
       }
+
+      // If possible, assign user to an agent or vise versa
+      assignNextAgent()
+      printAllUsers()
     })
 
     // Respond with socket-id
@@ -82,12 +141,13 @@ io.on('connection', (socket) => {
 
   socket.on('send-message', (msg) => {
 
+    console.log("send-message", msg)
+
     const message = {
       sender: msg.from,
       recipient: msg.to,
       message: msg.value
     }
-
 
     io.to(msg.to).emit('receive-message', message)
     io.to(msg.from).emit('receive-message', message)
@@ -95,7 +155,7 @@ io.on('connection', (socket) => {
 
   socket.on('assign-user', (msg) => {
     console.log(msg)
-    io.to(msg.user).emit('assigned-agent', msg.agent)
+    io.to(msg.user).emit('assigned-agent', { socketId: msg.agent })
   })
 
 });

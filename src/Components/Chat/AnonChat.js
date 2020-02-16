@@ -31,12 +31,13 @@ class AnonChat extends Component {
         console.log('receive-message', res)
         this.setState({
           chat: [ ...this.state.chat, res ]
-        })
+        }, console.log(this.state))
       })
 
       socket.on( 'assigned-agent' , (msg) => {
+        console.log('assigned-agent', msg)
         this.setState({
-          to: msg
+          to: msg.socketId
         })
       })
       

@@ -21,6 +21,7 @@ class AuthChat extends Component {
       this.state = {
         users: [],
         authUsers: [],
+        assignedUsers: [],
         chat: [],
         id: '',
         selectedUser: ''
@@ -30,11 +31,21 @@ class AuthChat extends Component {
     componentDidMount = () => {
       
       socket = io(ENDPOINT + `?token=${this.props.auth.jwtToken}`)
+      
+      socket.emit('join', {
+        username: this.props.user.username,
+        jwtToken: this.props.auth.jwtToken
+      })
 
       socket.on('users', (msg) => {
+
+        const assignedUsers = msg.users
+          .filter( x => x.assignedAgent === this.state.id )
+
         this.setState({
           users: msg.users,
-          authUsers: msg.authorizedUsers
+          authUsers: msg.authorizedUsers,
+          assignedUsers: assignedUsers
         })
       })
 
@@ -44,11 +55,6 @@ class AuthChat extends Component {
           chat: [ ...this.state.chat, res ]
         })
       })
-      
-      socket.emit('join', {
-        username: this.props.user.username,
-        jwtToken: this.props.auth.jwtToken
-      })
 
       socket.on('joined', (msg) => {
         console.log(`Your id is ${msg.id}`)
@@ -56,7 +62,7 @@ class AuthChat extends Component {
           id: msg.id,
         })
       })
-      
+
     }
 
     componentWillUnmount = () => {
@@ -94,15 +100,21 @@ class AuthChat extends Component {
           <Row className="auth-chat-container">
             <Col xs={4} className="auth-chat-sidebar">
               <div className="auth-chat-authenticated-users">
-                Auth users
+                All Authenticated Users
                 <ul>
                   { this.getUserList(this.state.authUsers) }
                 </ul>
               </div>
               <div className="auth-chat-anonymous-users">
-                Anon users
+                All Anonymous Users
                 <ul>
                   { this.getUserList(this.state.users) }
+                </ul>
+              </div>
+              <div className="auth-chat-authenticated-users">
+                Your Assigned users
+                <ul>
+                  { this.getUserList(this.state.assignedUsers) }
                 </ul>
               </div>
             </Col>
