@@ -117,8 +117,9 @@ class AuthChat extends Component {
             onClick={(e) => this.setUser(e, x.socketId) }
             onContextMenu={ (e) => this.setMenuItems(e, x.socketId) }
           >
-              {x.socketId}
-          </li>
+              {x.socketId == this.state.id && <b>(You) </b>}
+              {x.username ? x.username : x.socketId}
+         </li>
       )
     }
 
@@ -127,7 +128,11 @@ class AuthChat extends Component {
      */
     getAssignedUserList = (users) => {
       return this.getUserList(users).map((listItem, i) => 
-        <ContextMenuTrigger id={`SIMPLE`} key={i} holdToDisplay={1000}>
+        <ContextMenuTrigger 
+          id={`SIMPLE`} 
+          key={i} 
+          holdToDisplay={1000}
+        >
           { listItem }
         </ContextMenuTrigger>
       )
@@ -191,7 +196,7 @@ class AuthChat extends Component {
                 data={{ socketId: item.socketId }} 
                 onClick={this.handleMenuItemClick}
               >
-                {item.socketId}
+                <span>{item.username}</span>
               </MenuItem> 
             )}
           </ContextMenu>

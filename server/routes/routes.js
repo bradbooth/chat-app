@@ -9,8 +9,9 @@ app.post('/api/login',
   (request, response) => {
 
     // Create JWT Token with user id
+    console.log("REQUEST:", )
     const token = jwt.sign(
-      { _id: request.user._id }, 
+      { _id: request.user._id, _username: request.user.username }, 
       process.env.secret,
       { expiresIn: '1d' });
 

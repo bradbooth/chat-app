@@ -108,6 +108,7 @@ io.on('connection', (socket) => {
         user.assignedAgent = null
         // Notify the user that agent disconnected
         io.to(user.socketId).emit('assigned-agent', { socketId: null })
+        assignNextAgent()
       }
       return user
     })
@@ -137,6 +138,7 @@ io.on('connection', (socket) => {
       } else {
         console.log('Authorized: ', decoded)
         authorizedUsers.push({
+          username: decoded._username,
           socketId: socket.id,
           assignedUsers: []
         })

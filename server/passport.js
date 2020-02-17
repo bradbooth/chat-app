@@ -31,7 +31,11 @@ const jwtVerify = (jwtPayload, cb) => {
 }
 
 passport.serializeUser(function(user, cb) {
-  cb(null, user._id);
+  console.log("USER:", user)
+  cb(null, {
+    _id: user._id,
+    username: user.username
+  });
 });
 
 passport.deserializeUser(function(id, done) {

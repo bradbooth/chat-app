@@ -25,12 +25,12 @@ const createNewUser = (username, password, callback) => {
         assert.equal(null, err);
 
         collection.findOneAndUpdate(
-        { username: username }, 
-        { $set: { password: hash }},
-        { upsert: true},
-        (err, res) => {
-            callback(err, res)
-        }
+            { username: username }, 
+            { $set: { password: hash }},
+            { upsert: true},
+            (err, res) => {
+                callback(err, res)
+            }
         )
     })
       
