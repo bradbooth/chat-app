@@ -36,6 +36,10 @@ const printAllUsers = () => {
   )
 }
 
+/**
+ * Updated all authorized users with the current
+ * state of users
+ */
 const updateUsers = () => {
   io.to(AUTHORIZED).emit('users', {
     users,
@@ -44,12 +48,25 @@ const updateUsers = () => {
 }
 
 /**
- * Attempt to assign next avaliable agent to a user
+ * Attempt to assign next avaliable agent to a user,
+ * chooising the next agent with the least amount of
+ * users currently
  */
 const assignNextAgent = () => {
-  // Loop through all agents, and assign the one with
-  // the least amount of clients? Or just 1 at a time?
-  const nextAgentIndex = authorizedUsers.findIndex( x => x.assignedUser === null )
+
+  // Find the next agent with least amount of users currently assigned
+  const nextAgent = authorizedUsers.reduce(
+    (minUsr, usr) => {
+      if ( usr.assignedUsers.length < minUsr.assignedUsers.length ){
+        return usr
+      } else {
+        return minUsr
+      }
+    },
+    authorizedUsers[0] //Default to first authorized user
+  );
+
+  const nextAgentIndex = authorizedUsers.indexOf(nextAgent)
   const nextUserIndex  = users.findIndex( x => x.assignedAgent == null )
 
   // If theres an avaliable agent and a waiting user
@@ -58,11 +75,12 @@ const assignNextAgent = () => {
     const usrSocketId = users[nextUserIndex].socketId
     const agtSocketId = authorizedUsers[nextAgentIndex].socketId
 
-    authorizedUsers[nextAgentIndex].assignedUser = usrSocketId
+    // Add the user to list of assigned users
+    authorizedUsers[nextAgentIndex].assignedUsers.push(usrSocketId)
+    
+    // Assign agent to user and notify of agent id
     users[nextUserIndex].assignedAgent = agtSocketId
-
     io.to(usrSocketId).emit('assigned-agent', { socketId: agtSocketId } )
-    io.to(agtSocketId).emit('assigned-user',  { socketId: usrSocketId } )
 
   }
 }
@@ -79,9 +97,7 @@ io.on('connection', (socket) => {
     
     // If the user was assigned an agent, remove the assignment
     authorizedUsers = authorizedUsers.map( agent => {
-      if ( agent.assignedUser === socket.id ){
-        agent.assignedUser = null
-      }
+      agent.assignedUsers = agent.assignedUsers.filter( x => x !== socket.id )
       return agent
     })
 
@@ -121,7 +137,7 @@ io.on('connection', (socket) => {
         console.log('Authorized: ', decoded)
         authorizedUsers.push({
           socketId: socket.id,
-          assignedUser: null
+          assignedUsers: []
         })
         socket.join(AUTHORIZED)
       }
@@ -139,6 +155,9 @@ io.on('connection', (socket) => {
     updateUsers()
   })
 
+  /**
+   * Send a message to another user
+   */
   socket.on('send-message', (msg) => {
 
     console.log("send-message", msg)
@@ -153,29 +172,35 @@ io.on('connection', (socket) => {
     io.to(msg.from).emit('receive-message', message)
   })
 
+  /**
+   * Assign a user the given agent
+   */
   socket.on('assign-user', (msg) => {
     console.log(msg)
     io.to(msg.user).emit('assigned-agent', { socketId: msg.agent })
   })
 
+  /**
+   * Transfer a user from one agent to another
+   */
   socket.on('transfer-user', (msg) => {
     console.log('transfer-user', msg, socket.id)
 
     authorizedUsers = authorizedUsers.map( usr => {
       // Remove user from current agent
-      if ( usr.socketId == socket.id ){
-        usr.assignedUser = null
+      if ( usr.socketId === socket.id ){
+        usr.assignedUsers = usr.assignedUsers.filter( x => x !== msg.user )
       }
       // Assign user to new agent
       if ( usr.socketId === msg.agent ){
-        usr.assignedUser = msg.user
+        usr.assignedUsers = usr.assignedUsers.concat(msg.user)
       }
       return usr
     })
 
+    // Change the users assigned agent and notify the user of the change
     users = users.map( usr => {
-      // Change the users assigned agent and notify them
-      if ( usr.socketId = msg.user ){
+      if ( usr.socketId === msg.user ){
         usr.assignedAgent = msg.agent
         io.to(usr.socketId).emit('assigned-agent', { socketId: msg.agent })
       }
@@ -183,7 +208,6 @@ io.on('connection', (socket) => {
     })
 
     updateUsers()
-
   })
 
 });

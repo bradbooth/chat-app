@@ -93,8 +93,7 @@ class AuthChat extends Component {
         menu: {
           target: socketId,
           items: this.state.authUsers.filter(
-            x => x.socketId !== this.state.id &&
-                 x.assignedUser === null
+            x => x.socketId !== this.state.id 
           )
         }
       })
