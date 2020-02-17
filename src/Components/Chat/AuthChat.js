@@ -100,10 +100,17 @@ class AuthChat extends Component {
       const selectedUser = this.state.users.find( user => user.id === this.state.selectedUser)
       console.log('getSelectedUserChatHistory', selectedUser)
       if ( selectedUser ){
-        return selectedUser.chatHistory.filter( 
-          msg => msg.to   === this.state.id ||
-                 msg.from === this.state.id 
-        )
+
+
+        if ( this.getAgents().some( x => x.id === selectedUser.id )){
+          return selectedUser.chatHistory.filter( 
+            msg => msg.to   === this.state.id ||
+                   msg.from === this.state.id 
+          )} else {
+          return selectedUser.chatHistory.filter( 
+            msg => msg.to   === this.state.selectedUser ||
+                   msg.from === this.state.selectedUser 
+          )}
       } else {
         return []
       }
