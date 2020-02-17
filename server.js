@@ -9,7 +9,7 @@ const http = require('http').createServer(app)
 const io = require("socket.io")(http, { origins: '*:*'});
 const jwt = require('jsonwebtoken');
 
-const port = 4001
+const port = process.env.PORT || 4001
 const publicPath = path.join(__dirname, 'build');
 const routes = require('./server/routes/routes');
 

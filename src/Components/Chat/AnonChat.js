@@ -5,7 +5,8 @@ import Chat from './Chat'
 
 var socket;
 
-const ENDPOINT = 'http://localhost:4001'
+const ENDPOINT = `http://localhost:${process.env.REACT_APP_PORT}`
+
 class AnonChat extends Component {
 
     constructor() {
@@ -19,12 +20,12 @@ class AnonChat extends Component {
     }
   
     componentDidMount = () => {
+
       
-      socket = io(ENDPOINT + `?token=${this.props.auth.jwtToken}`)
-      socket.on('chat message', (msg) => {
-        this.setState({
-          chat: [...this.state.chat, msg]
-        })
+      socket = io({
+        query: {
+          token: `${this.props.auth.jwtToken}`
+        }
       })
 
       socket.on( 'receive-message' , (msg) => {

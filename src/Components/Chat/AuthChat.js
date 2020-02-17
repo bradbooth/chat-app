@@ -10,7 +10,7 @@ import './AuthChat.css';
 
 var socket;
 
-const ENDPOINT = 'http://localhost:4001'
+const ENDPOINT = `http://localhost:${process.env.REACT_APP_PORT}`
 
 class AuthChat extends Component {
 
@@ -30,9 +30,13 @@ class AuthChat extends Component {
     }
   
     componentDidMount = () => {
-      
-      socket = io(ENDPOINT + `?token=${this.props.auth.jwtToken}`)
-      
+
+      socket = io({
+        query: {
+          token: `${this.props.auth.jwtToken}`
+        }
+      })
+              
       socket.emit('join', {
         username: this.props.user.username,
         jwtToken: this.props.auth.jwtToken
