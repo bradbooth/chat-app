@@ -177,7 +177,10 @@ io.on('connection', (socket) => {
       from: socket.id,
       value: msg.value
     }
+
     console.log('send-message', message)
+    // Ignore incorecctly formatted messages
+    if ( message.to === null || message.from === null ) return
 
     // Update users chat histories
     users = users.map( user => {

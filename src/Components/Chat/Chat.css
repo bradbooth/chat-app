@@ -14,3 +14,8 @@
     max-height: 50vh;
     height: 370px;
 }
+
+.chat-item-from {
+    font-size: 12px;
+    color: gray;
+}

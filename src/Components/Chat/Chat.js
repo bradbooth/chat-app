@@ -32,10 +32,18 @@ export class Chat extends React.Component {
   
           if ( msg.from === this.props.from ){
             style = {
-              textAlign: "right"
+              textAlign: "right",
             }
           }
-          return <h5 style={style} key={key}>{msg.value}</h5>
+          return <span 
+                    style={style} 
+                    key={key}
+                 >
+                    <div className="chat-item-value">{msg.value}</div>
+                    <div className="chat-item-from">
+                        {msg.from === this.props.from ? "You" : msg.from }
+                    </div>
+                 </span>
         })
       }
 

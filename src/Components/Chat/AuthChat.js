@@ -84,7 +84,7 @@ class AuthChat extends Component {
           key={index}
           onClick={(e) => this.setSelectedUser(e, item)}
         >
-          {item.username ? item.username : item.id }
+          {item.username && item.username + " - " } {item.id}
         </li>)
     }
 
@@ -101,16 +101,17 @@ class AuthChat extends Component {
       console.log('getSelectedUserChatHistory', selectedUser)
       if ( selectedUser ){
 
-
+        // If its an agent talking to an agent then only show their messages
         if ( this.getAgents().some( x => x.id === selectedUser.id )){
           return selectedUser.chatHistory.filter( 
             msg => msg.to   === this.state.id ||
                    msg.from === this.state.id 
-          )} else {
+        )} else {
+        // Otherwise show all messages sent to a client from all agents
           return selectedUser.chatHistory.filter( 
             msg => msg.to   === this.state.selectedUser ||
                    msg.from === this.state.selectedUser 
-          )}
+        )}
       } else {
         return []
       }
