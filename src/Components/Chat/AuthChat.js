@@ -100,7 +100,10 @@ class AuthChat extends Component {
       const selectedUser = this.state.users.find( user => user.id === this.state.selectedUser)
       console.log('getSelectedUserChatHistory', selectedUser)
       if ( selectedUser ){
-        return selectedUser.chatHistory
+        return selectedUser.chatHistory.filter( 
+          msg => msg.to   === this.state.id ||
+                 msg.from === this.state.id 
+        )
       } else {
         return []
       }
@@ -122,13 +125,17 @@ class AuthChat extends Component {
      * Assigned users can be right-clicked to transfer
      */
     getAssignedUserList = () => {
-      return this.getAssignedUsers().map((listItem, i) => 
+      return this.getAssignedUsers().map((item, i) => 
         <ContextMenuTrigger 
           id={`SIMPLE`} 
-          key={i} 
+          key={i}
           holdToDisplay={1000}
         >
-          { listItem.id }
+          <li
+            className="chat-list-item "
+            onClick={(e) => this.setSelectedUser(e, item)}>
+              { item.id }
+          </li>
         </ContextMenuTrigger>
       )
     }
@@ -182,7 +189,9 @@ class AuthChat extends Component {
         {/* Right click menu */}
           <ContextMenu id="SIMPLE">
             <div> Transfer to: </div>
-
+            { this.getOtherAgents().length === 0 && 
+              <div>No agents avaliable</div>  
+            }
             { this.getOtherAgents().map( (item, index) =>
               <MenuItem 
                 key={index} 
@@ -193,10 +202,6 @@ class AuthChat extends Component {
               </MenuItem> 
             )}
           </ContextMenu>
-
-          {/* { this.getAgents().length === 0 && 
-              <div>No agents avaliable</div>  
-            } */}
 
         </Container>
       )

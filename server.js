@@ -202,8 +202,6 @@ io.on('connection', (socket) => {
 
     // Update users assigned agent
     const indexOfUser = getIndexOfUser(msg.user)
-
-    console.log('index of user:', getIndexOfUser(msg.user))
     users[indexOfUser].assignedAgent = msg.agent
     io.to(users[indexOfUser].id).emit('assigned-agent', msg.agent)
 
