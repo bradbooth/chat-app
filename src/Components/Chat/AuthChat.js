@@ -111,7 +111,6 @@ class AuthChat extends Component {
 
     getUserList = (users) => {
       return users.map ( (x,i) =>
-        <ContextMenuTrigger id={`SIMPLE`} key={i} holdToDisplay={1000}>
           <li 
             style={{cursor: 'pointer', listStyle: 'none'}}
             key={i} 
@@ -120,6 +119,16 @@ class AuthChat extends Component {
           >
               {x.socketId}
           </li>
+      )
+    }
+
+    /**
+     * Assigned users can be right-clicked to transfer
+     */
+    getAssignedUserList = (users) => {
+      return this.getUserList(users).map((listItem, i) => 
+        <ContextMenuTrigger id={`SIMPLE`} key={i} holdToDisplay={1000}>
+          { listItem }
         </ContextMenuTrigger>
       )
     }
@@ -149,7 +158,7 @@ class AuthChat extends Component {
               <div className="auth-chat-authenticated-users">
                 Your Assigned users
                 <ul>
-                  { this.getUserList(this.state.assignedUsers) }
+                  { this.getAssignedUserList(this.state.assignedUsers) }
                 </ul>
               </div>
             </Col>
@@ -172,7 +181,10 @@ class AuthChat extends Component {
 
         {/* Right click menu */}
           <ContextMenu id="SIMPLE">
-            <span> Transfer to: </span>
+            <div> Transfer to: </div>
+            { this.state.menu.items.length === 0 && 
+              <div>No agents avaliable</div>  
+            }
             { this.state.menu.items.map( (item, index) =>
               <MenuItem 
                 key={index} 

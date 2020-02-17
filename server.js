@@ -31,6 +31,7 @@ let authorizedUsers = []
 
 const printAllUsers = () => {
   console.log(
+    "Current users:\n",
     "Auth:", authorizedUsers, '\n',
     "Users:", users
   )
@@ -93,7 +94,7 @@ io.on('connection', (socket) => {
 
     // Remove the user/agent from our active users/agents list
     users = users.filter( usr => usr.socketId != socket.id )
-    authorizedUsers = authorizedUsers.filter( usr => usr.socketId != socket.id )
+    authorizedUsers = authorizedUsers.filter( usr => usr.socketId !== socket.id )
     
     // If the user was assigned an agent, remove the assignment
     authorizedUsers = authorizedUsers.map( agent => {
@@ -184,7 +185,7 @@ io.on('connection', (socket) => {
    * Transfer a user from one agent to another
    */
   socket.on('transfer-user', (msg) => {
-    console.log('transfer-user', msg, socket.id)
+    console.log('transfer-user', msg)
 
     authorizedUsers = authorizedUsers.map( usr => {
       // Remove user from current agent
