@@ -16,7 +16,6 @@ export class Chat extends React.Component {
     }
 
     setMessage = (e) => {
-        console.log("setmessage")
         this.setState({
             value: e.target.value
         })
@@ -24,22 +23,19 @@ export class Chat extends React.Component {
 
     getChat = () => {
         // Only show messages relating to currently selected recipent
-        const messages = this.props.chat.filter( 
-          msg => msg.sender    === this.props.to ||
-                 msg.recipient === this.props.to
-        )
+        let messages = this.props.chat
 
         return messages.map( (msg, key) => {
-          let style = {
+            let style = {
             textAlign: "left"
           }
   
-          if ( msg.sender === this.props.from ){
+          if ( msg.from === this.props.from ){
             style = {
               textAlign: "right"
             }
           }
-          return <h5 style={style} key={key}>{msg.message}</h5>
+          return <h5 style={style} key={key}>{msg.value}</h5>
         })
       }
 
@@ -52,7 +48,7 @@ export class Chat extends React.Component {
                 value: this.state.value
             }
 
-            console.log(this.state, 'msg:', message)
+            console.log('Sending message:', message)
             this.props.sendMessage(message)
             this.setState({
                 value: ''
@@ -60,7 +56,6 @@ export class Chat extends React.Component {
         }
     }
   
-
     render() {
         return (
             <Container >
@@ -78,6 +73,7 @@ export class Chat extends React.Component {
                         value={ this.state.value }
                         onChange={ this.setMessage }
                         onKeyDown={ this.sendMessage }
+                        disabled={ this.props.to === ''}
                     />
                 </Col>
             </Row>

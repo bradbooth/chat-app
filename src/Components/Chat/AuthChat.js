@@ -17,20 +17,16 @@ class AuthChat extends Component {
     constructor() {
       super();
 
-      this.setUser = this.setUser.bind(this)
-
       this.state = {
+        id: null,
         users: [],
-        authUsers: [],
-        assignedUsers: [],
-        chat: [],
-        id: '',
-        selectedUser: '',
-        menu: {
-          target: null,
-          items: []
-        }
+        chatHistory: [],
+        selectedUser: null
       };
+    }
+
+    componentWillUnmount = () => {
+      socket.close()
     }
   
     componentDidMount = () => {
@@ -42,98 +38,97 @@ class AuthChat extends Component {
         jwtToken: this.props.auth.jwtToken
       })
 
-      socket.on('users', (msg) => {
-
-        const assignedUsers = msg.users
-          .filter( x => x.assignedAgent === this.state.id )
-
+      socket.on('joined', (id) => {
+        console.log(`Your id is ${id}`)
         this.setState({
-          users: msg.users,
-          authUsers: msg.authorizedUsers,
-          assignedUsers: assignedUsers
+          id: id,
         })
       })
 
-      socket.on( 'receive-message' , (res) => {
-        console.log('receive-message', res)
+      socket.on('update-users', (msg) => {
+        console.log('update-users', msg)
         this.setState({
-          chat: [ ...this.state.chat, res ]
-        })
-      })
-
-      socket.on('joined', (msg) => {
-        console.log(`Your id is ${msg.id}`)
-        this.setState({
-          id: msg.id,
+          users: msg.users
         })
       })
 
     }
 
-    componentWillUnmount = () => {
-      socket.close()
+    getAgents = () => {
+      return this.state.users.filter( user => user.isAgent )
     }
 
-    setUser = (e, socketId) => {
-      socket.emit('assign-user', {
-        agent: this.state.id,
-        user: socketId
-      })
+    getOtherAgents = () => {
+      return this.getAgents().filter( user => user.id !== this.state.id )
+    }
 
+    getUsers = () => {
+      return this.state.users.filter( user => !user.isAgent )
+    }
+
+    getSelf = () => {
+      return this.state.users.find( user => user.id === this.state.id )
+    }
+
+    getAssignedUsers = () => {
+      const self = this.getSelf()
+      return self ? 
+             self.assignedUsers.map(id => ({id: id})) : 
+             []
+    }
+
+    getAsUserList = (items) => {
+      return items.map( (item,index) => 
+        <li 
+          className="chat-list-item "
+          key={index}
+          onClick={(e) => this.setSelectedUser(e, item)}
+        >
+          {item.username ? item.username : item.id }
+        </li>)
+    }
+
+    setSelectedUser = (e, user) => {
+      console.log('setSelectedUser', user)
       this.setState({
-        selectedUser: socketId
+        selectedUser: user.id
       })
     }
 
-    setMenuItems = (e, socketId) => {
-      // e.preventDefault()
-
-      console.log(this.state.authUsers)
-      this.setState({
-        menu: {
-          target: socketId,
-          items: this.state.authUsers.filter(
-            x => x.socketId !== this.state.id 
-          )
-        }
-      })
-      console.log("Target is:", socketId)
+    /** Get the chat history corresponding to the selected user */
+    getSelectedUserChatHistory = () => {
+      const selectedUser = this.state.users.find( user => user.id === this.state.selectedUser)
+      console.log('getSelectedUserChatHistory', selectedUser)
+      if ( selectedUser ){
+        return selectedUser.chatHistory
+      } else {
+        return []
+      }
     }
 
-    handleMenuItemClick = (e, data) => {
-      console.log("transfer ", this.state.menu.target, "to", data.socketId)
-      
+    transferUser = (e, data) => {
+
+      const user = data.target.innerText
+      const agent = data.id
+      console.log("transfer ", user, "to", agent)
+
       socket.emit('transfer-user', {
-        user: this.state.menu.target,
-        agent: data.socketId
+        user: user,
+        agent: agent,
       })
-    }
-
-    getUserList = (users) => {
-      return users.map ( (x,i) =>
-          <li 
-            style={{cursor: 'pointer', listStyle: 'none'}}
-            key={i} 
-            onClick={(e) => this.setUser(e, x.socketId) }
-            onContextMenu={ (e) => this.setMenuItems(e, x.socketId) }
-          >
-              {x.socketId == this.state.id && <b>(You) </b>}
-              {x.username ? x.username : x.socketId}
-         </li>
-      )
     }
 
     /**
      * Assigned users can be right-clicked to transfer
      */
-    getAssignedUserList = (users) => {
-      return this.getUserList(users).map((listItem, i) => 
+    getAssignedUserList = () => {
+      return this.getAssignedUsers().map((listItem, i) => 
         <ContextMenuTrigger 
           id={`SIMPLE`} 
           key={i} 
           holdToDisplay={1000}
         >
-          { listItem }
+          { listItem.id }
         </ContextMenuTrigger>
       )
     }
@@ -149,21 +144,21 @@ class AuthChat extends Component {
           <Row className="auth-chat-container">
             <Col xs={4} className="auth-chat-sidebar">
               <div className="auth-chat-authenticated-users">
-                All Authenticated Users
+                All Agents
                 <ul>
-                  { this.getUserList(this.state.authUsers) }
+                  { this.getAsUserList(this.getAgents()) }
                 </ul>
               </div>
               <div className="auth-chat-anonymous-users">
                 All Anonymous Users
                 <ul>
-                  { this.getUserList(this.state.users) }
+                  { this.getAsUserList(this.getUsers()) }
                 </ul>
               </div>
               <div className="auth-chat-authenticated-users">
                 Your Assigned users
                 <ul>
-                  { this.getAssignedUserList(this.state.assignedUsers) }
+                  { this.getAssignedUserList() }
                 </ul>
               </div>
             </Col>
@@ -178,7 +173,7 @@ class AuthChat extends Component {
                   className="chat-messages-container"
                   to={ this.state.selectedUser }
                   from={ this.state.id }
-                  chat={ this.state.chat }
+                  chat={ this.getSelectedUserChatHistory() }
                   sendMessage={ this.sendMessage }
                 />
             </Col>
@@ -187,19 +182,21 @@ class AuthChat extends Component {
         {/* Right click menu */}
           <ContextMenu id="SIMPLE">
             <div> Transfer to: </div>
-            { this.state.menu.items.length === 0 && 
-              <div>No agents avaliable</div>  
-            }
-            { this.state.menu.items.map( (item, index) =>
+
+            { this.getOtherAgents().map( (item, index) =>
               <MenuItem 
                 key={index} 
-                data={{ socketId: item.socketId }} 
-                onClick={this.handleMenuItemClick}
+                data={{ id: item.id }} 
+                onClick={this.transferUser}
               >
                 <span>{item.username}</span>
               </MenuItem> 
             )}
           </ContextMenu>
+
+          {/* { this.getAgents().length === 0 && 
+              <div>No agents avaliable</div>  
+            } */}
 
         </Container>
       )

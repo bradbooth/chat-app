@@ -1,5 +1,4 @@
 const dotenv = require('dotenv').config()
-const db = require('./server/database')
 const passport = require('./server/passport').passport
 const express = require('express');
 const path = require('path');
@@ -27,103 +26,87 @@ app.use('/', routes);
 const AUTHORIZED = 'authorized'
 
 let users = []
-let authorizedUsers = []
 
 const printAllUsers = () => {
   console.log(
-    "Current users:\n",
-    "Auth:", authorizedUsers, '\n',
-    "Users:", users
+    "**********************  \n",
+    "Current users:          \n",
+    "Agents:", getAgents(), '\n',
+    "Users:",   getUsers(), '\n',
+    "**********************  \n"
   )
 }
 
-/**
- * Updated all authorized users with the current
- * state of users
- */
-const updateUsers = () => {
-  io.to(AUTHORIZED).emit('users', {
-    users,
-    authorizedUsers
+const getAgents = () => {
+  return users.filter( user => user.isAgent === true )
+}
+
+const getUsers = () => {
+  return users.filter( user => user.isAgent === false )
+}
+
+const getUser = (userId) => {
+  return users.find( user => user.id === userId )
+}
+
+const getIndexOfUser = (userId) => {
+  return users.findIndex( usr => usr.id === userId )
+}
+
+// Send the current state of users to all agents
+const updateAgents = () => {
+  io.to(AUTHORIZED).emit('update-users', {
+    users
   })
 }
 
 /**
- * Attempt to assign next avaliable agent to a user,
- * chooising the next agent with the least amount of
- * users currently
+ * Assign the next avaliable user to the agent with
+ * the smallest number of currently assigned users
  */
-const assignNextAgent = () => {
+const assignAgent = () => {
 
-  // Find the next agent with least amount of users currently assigned
-  const nextAgent = authorizedUsers.reduce(
-    (minUsr, usr) => {
-      if ( usr.assignedUsers.length < minUsr.assignedUsers.length ){
-        return usr
+  // Find the next user who is not assigned an agent
+  const nextUser = getUsers().find( user => user.assignedAgent === null )
+  if ( !nextUser ) return
+
+  // Find next agent with minimum number of users
+  const nextAgent = getAgents().reduce(
+    (agentWithMinUsers, currAgent) => {
+      if ( currAgent.assignedUsers.length < agentWithMinUsers.assignedUsers.length ){
+        return currAgent
       } else {
-        return minUsr
+        return agentWithMinUsers
       }
     },
-    authorizedUsers[0] //Default to first authorized user
+    getAgents()[0] //Default to first agent
   );
 
-  const nextAgentIndex = authorizedUsers.indexOf(nextAgent)
-  const nextUserIndex  = users.findIndex( x => x.assignedAgent == null )
+  // If there is an agent & user avaliable
+  if ( nextAgent && nextUser ){
 
-  // If theres an avaliable agent and a waiting user
-  if ( nextAgentIndex >= 0 && nextUserIndex >= 0 ){
-
-    const usrSocketId = users[nextUserIndex].socketId
-    const agtSocketId = authorizedUsers[nextAgentIndex].socketId
-
-    // Add the user to list of assigned users
-    authorizedUsers[nextAgentIndex].assignedUsers.push(usrSocketId)
+    const nextAgentIndex = users.indexOf(nextAgent)
+    const nextAgentId = users[nextAgentIndex].id
     
-    // Assign agent to user and notify of agent id
-    users[nextUserIndex].assignedAgent = agtSocketId
-    io.to(usrSocketId).emit('assigned-agent', { socketId: agtSocketId } )
+    const nextUserIndex = users.indexOf(nextUser)
+    const nextUserId = users[nextUserIndex].id
 
+    users[nextAgentIndex].assignedUsers.push(nextUserId)
+    users[nextUserIndex ].assignedAgent = nextAgentId
+
+    // Update user of their assignment
+    io.to(nextUserId).emit('assigned-agent', nextAgentId)
   }
+
 }
 
-
+/**
+ * On connection to server
+ */
 io.on('connection', (socket) => {
-  console.log('a user connected');
 
-  socket.on('disconnect', (msg) => {
-
-    // Remove the user/agent from our active users/agents list
-    users = users.filter( usr => usr.socketId != socket.id )
-    authorizedUsers = authorizedUsers.filter( usr => usr.socketId !== socket.id )
-    
-    // If the user was assigned an agent, remove the assignment
-    authorizedUsers = authorizedUsers.map( agent => {
-      agent.assignedUsers = agent.assignedUsers.filter( x => x !== socket.id )
-      return agent
-    })
-
-    // If the socket was an agent, remove the assigned agent from user
-    users = users.map( user => {
-      if ( user.assignedAgent === socket.id ){
-        user.assignedAgent = null
-        // Notify the user that agent disconnected
-        io.to(user.socketId).emit('assigned-agent', { socketId: null })
-        assignNextAgent()
-      }
-      return user
-    })
-
-    assignNextAgent()
-    printAllUsers()
-    updateUsers()
-
-    console.log('a user disconnected:', socket.id)
-  })
-
-  // Keep track of users who join with/out authorization
   socket.on('join', (msg) => {
-    console.log('Creating room for:', msg)
-
+    console.log('join', msg)
     jwt.verify(
       msg.jwtToken, 
       process.env.secret, 
@@ -132,85 +115,110 @@ io.on('connection', (socket) => {
       if ( err ){
         console.log('Unauthorized')
         users.push({
-          socketId: socket.id,
-          assignedAgent: null
+          id: socket.id,
+          assignedAgent: null,
+          isAgent: false,
+          chatHistory: []
         })
       } else {
         console.log('Authorized: ', decoded)
-        authorizedUsers.push({
+        users.push({
           username: decoded._username,
-          socketId: socket.id,
-          assignedUsers: []
+          id: socket.id,
+          assignedUsers: [],
+          isAgent: true,
+          chatHistory: []
         })
         socket.join(AUTHORIZED)
       }
-
-      // If possible, assign user to an agent or vise versa
-      assignNextAgent()
-      printAllUsers()
     })
 
-    // Respond with socket-id
-    io.to(socket.id).emit('joined', {
-      id: socket.id
-    });
+    io.to(socket.id).emit('joined', socket.id)
 
-    updateUsers()
+    assignAgent()
+    printAllUsers()
+    updateAgents()
+  })
+  
+  socket.on('disconnect', (msg) => {
+    console.log('disconnect', msg)
+
+    const disconnectingUserId = socket.id
+
+    users = users.filter( user => user.id !== disconnectingUserId )
+
+    //Remove user from all assignments
+    users = users.map( user => {
+
+      // Remove the user from agents assigned users
+      if ( user.isAgent ){
+        user.assignedUsers = user.assignedUsers.filter( id => id !== disconnectingUserId )
+      }
+
+      // If the agent disconnected, remove the assigned agent from users
+      if ( !user.isAgent && user.assignedAgent === disconnectingUserId ){
+        user.assignedAgent = null
+        // Attempt to reassign a new agent
+        assignAgent()
+      }
+
+      return user
+    })
+
+    assignAgent()
+    updateAgents()
+    printAllUsers()
   })
 
-  /**
-   * Send a message to another user
-   */
   socket.on('send-message', (msg) => {
-
-    console.log("send-message", msg)
-
+    
     const message = {
-      sender: msg.from,
-      recipient: msg.to,
-      message: msg.value
+      to: msg.to,
+      from: socket.id,
+      value: msg.value
     }
+    console.log('send-message', message)
 
-    io.to(msg.to).emit('receive-message', message)
-    io.to(msg.from).emit('receive-message', message)
+    // Update users chat histories
+    users = users.map( user => {
+      // Add message to both users chat histories
+      if ( user.id == message.to || user.id == message.from ){
+        user.chatHistory = user.chatHistory.concat(message)
+      }
+      return user
+    })
+
+    // Update users/agents with their new chat history
+    io.to(message.to  ).emit('receive-message', getUser(message.to).chatHistory)
+    io.to(message.from).emit('receive-message', getUser(message.from).chatHistory)
+
+    printAllUsers()
+    updateAgents()
   })
 
-  /**
-   * Assign a user the given agent
-   */
-  socket.on('assign-user', (msg) => {
-    console.log(msg)
-    io.to(msg.user).emit('assigned-agent', { socketId: msg.agent })
-  })
-
-  /**
-   * Transfer a user from one agent to another
-   */
-  socket.on('transfer-user', (msg) => {
+  socket.on('transfer-user', (msg) =>{
     console.log('transfer-user', msg)
+    // user: ... , agent: ...
 
-    authorizedUsers = authorizedUsers.map( usr => {
-      // Remove user from current agent
-      if ( usr.socketId === socket.id ){
-        usr.assignedUsers = usr.assignedUsers.filter( x => x !== msg.user )
-      }
-      // Assign user to new agent
-      if ( usr.socketId === msg.agent ){
-        usr.assignedUsers = usr.assignedUsers.concat(msg.user)
-      }
-      return usr
-    })
+    // Update users assigned agent
+    const indexOfUser = getIndexOfUser(msg.user)
 
-    // Change the users assigned agent and notify the user of the change
-    users = users.map( usr => {
-      if ( usr.socketId === msg.user ){
-        usr.assignedAgent = msg.agent
-        io.to(usr.socketId).emit('assigned-agent', { socketId: msg.agent })
-      }
-      return usr
-    })
+    console.log('index of user:', getIndexOfUser(msg.user))
+    users[indexOfUser].assignedAgent = msg.agent
+    io.to(users[indexOfUser].id).emit('assigned-agent', msg.agent)
 
-    updateUsers()
+    // Update new agent with assigned user
+    const indexOfNewAgent = getIndexOfUser(msg.agent)
+    users[indexOfNewAgent].assignedUsers = users[indexOfNewAgent].assignedUsers.concat(msg.user)
+
+    // Remove from current Agent
+    const indexOfOldAgent = getIndexOfUser(socket.id)
+    users[indexOfOldAgent].assignedUsers = users[indexOfOldAgent].assignedUsers.filter(
+      id => id !== msg.user
+    )
+
+    updateAgents()
+
   })
 
 });

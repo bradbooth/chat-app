@@ -27,17 +27,17 @@ class AnonChat extends Component {
         })
       })
 
-      socket.on( 'receive-message' , (res) => {
-        console.log('receive-message', res)
+      socket.on( 'receive-message' , (msg) => {
+        console.log('receive-message', msg)
         this.setState({
-          chat: [ ...this.state.chat, res ]
-        }, console.log(this.state))
+          chat: [ ...msg ]
+        })
       })
 
-      socket.on( 'assigned-agent' , (msg) => {
-        console.log('assigned-agent', msg)
+      socket.on( 'assigned-agent' , (id) => {
+        console.log('assigned-agent', id)
         this.setState({
-          to: msg.socketId
+          to: id,
         })
       })
       
@@ -45,10 +45,10 @@ class AnonChat extends Component {
         username: this.state.username
       })
       
-      socket.on('joined', (msg) => {
-        console.log(`Your id is ${msg.id}`)
+      socket.on('joined', (id) => {
+        console.log(`Your id is ${id}`)
         this.setState({
-          id: msg.id
+          id: id
         })
       })   
     }

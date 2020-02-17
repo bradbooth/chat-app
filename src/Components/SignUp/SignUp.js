@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import history from '../../History/History';
+
 const axios = require('axios').default;
 
 export class SignUp extends Component {
@@ -28,11 +30,7 @@ export class SignUp extends Component {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {
-                console.log(res)
-                this.setState({
-                    username: '',
-                    password: ''
-                })
+                history.push('/login')
             }).catch( err => {
                 console.log(err)
             })

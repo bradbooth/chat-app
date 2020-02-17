@@ -13,8 +13,9 @@
     flex-flow: column nowrap;
 }
 
-
-
+.chat-list-item {
+    cursor: pointer;
+}
 
 .react-contextmenu {
     background-color: #fff;

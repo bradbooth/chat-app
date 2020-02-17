@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const db = require('../database')
 const passport = require('../passport').passport
 const jwt = require('jsonwebtoken');
 
