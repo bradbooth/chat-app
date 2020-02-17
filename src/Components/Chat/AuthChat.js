@@ -3,6 +3,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Container, Row, Col } from 'react-bootstrap';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Chat from './Chat'
 import io from "socket.io-client";
 import './AuthChat.css'; 
@@ -24,7 +25,11 @@ class AuthChat extends Component {
         assignedUsers: [],
         chat: [],
         id: '',
-        selectedUser: ''
+        selectedUser: '',
+        menu: {
+          target: null,
+          items: []
+        }
       };
     }
   
@@ -80,12 +85,43 @@ class AuthChat extends Component {
       })
     }
 
+    setMenuItems = (e, socketId) => {
+      // e.preventDefault()
+
+      console.log(this.state.authUsers)
+      this.setState({
+        menu: {
+          target: socketId,
+          items: this.state.authUsers.filter(
+            x => x.socketId !== this.state.id &&
+                 x.assignedUser === null
+          )
+        }
+      })
+      console.log("Target is:", socketId)
+    }
+
+    handleMenuItemClick = (e, data) => {
+      console.log("transfer ", this.state.menu.target, "to", data.socketId)
+      
+      socket.emit('transfer-user', {
+        user: this.state.menu.target,
+        agent: data.socketId
+      })
+    }
+
     getUserList = (users) => {
-      return users.map ( (x,i) => 
-        <li 
-          style={{cursor: 'pointer', listStyle: 'none'}}
-          key={i} 
-          onClick={(e) => this.setUser(e, x.socketId) }>{x.socketId}</li>
+      return users.map ( (x,i) =>
+        <ContextMenuTrigger id={`SIMPLE`} key={i} holdToDisplay={1000}>
+          <li 
+            style={{cursor: 'pointer', listStyle: 'none'}}
+            key={i} 
+            onClick={(e) => this.setUser(e, x.socketId) }
+            onContextMenu={ (e) => this.setMenuItems(e, x.socketId) }
+          >
+              {x.socketId}
+          </li>
+        </ContextMenuTrigger>
       )
     }
 
@@ -134,6 +170,21 @@ class AuthChat extends Component {
                 />
             </Col>
           </Row>
+
+        {/* Right click menu */}
+          <ContextMenu id="SIMPLE">
+            <span> Transfer to: </span>
+            { this.state.menu.items.map( (item, index) =>
+              <MenuItem 
+                key={index} 
+                data={{ socketId: item.socketId }} 
+                onClick={this.handleMenuItemClick}
+              >
+                {item.socketId}
+              </MenuItem> 
+            )}
+          </ContextMenu>
+
         </Container>
       )
     }

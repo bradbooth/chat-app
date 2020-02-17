@@ -158,6 +158,34 @@ io.on('connection', (socket) => {
     io.to(msg.user).emit('assigned-agent', { socketId: msg.agent })
   })
 
+  socket.on('transfer-user', (msg) => {
+    console.log('transfer-user', msg, socket.id)
+
+    authorizedUsers = authorizedUsers.map( usr => {
+      // Remove user from current agent
+      if ( usr.socketId == socket.id ){
+        usr.assignedUser = null
+      }
+      // Assign user to new agent
+      if ( usr.socketId === msg.agent ){
+        usr.assignedUser = msg.user
+      }
+      return usr
+    })
+
+    users = users.map( usr => {
+      // Change the users assigned agent and notify them
+      if ( usr.socketId = msg.user ){
+        usr.assignedAgent = msg.agent
+        io.to(usr.socketId).emit('assigned-agent', { socketId: msg.agent })
+      }
+      return usr
+    })
+
+    updateUsers()
+
+  })
+
 });
 
 // Serve web pages
