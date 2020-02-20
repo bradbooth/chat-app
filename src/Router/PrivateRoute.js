@@ -20,10 +20,10 @@ export class PrivateRoute extends Component {
                     children
                 ) : (
                     <Redirect
-                    to={{
-                        pathname: "/login",
-                        state: { from: location }
-                    }}
+                        to={{
+                            pathname: "/login",
+                            state: { from: location }
+                        }}
                     />
                 )
                 }

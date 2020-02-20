@@ -15,6 +15,7 @@ import AuthChat from '../Components/Chat/AuthChat'
 import SignUp from '../Components/SignUp/SignUp'
 import Login from '../Components/Login/Login'
 import Auth from '../Auth/Auth'
+import Home from '../Components/Home/Home'
 
 import './AppRouter.css'; 
 
@@ -32,7 +33,7 @@ class AppRouter extends Component {
       <Router history={history} >
 
         <Navbar bg="light" expand="lg">
-          <Navbar.Brand href="">EECS 4481 - Chat App</Navbar.Brand>
+          <Navbar.Brand href="/">EECS 4481 - Chat App</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
@@ -58,8 +59,10 @@ class AppRouter extends Component {
           <Route path="/login">
             <Login />
           </Route>
+          <Route path="/">
+            <Home />
+          </Route>
         </Switch>
-
       </Router>
     )
   }

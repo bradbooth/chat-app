@@ -12,8 +12,8 @@ export class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            username: 'brad',
-            password: 'password',
+            username: '',
+            password: '',
             loggedIn: false
         }
     }

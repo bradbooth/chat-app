@@ -1,13 +1,25 @@
 
 # EECS 4481 Chat App Project
 
-# Run
-Run express server
+# Requirements
 ```
-nodemon server.js
+node v13.6.0
+npm v6.13.4
 ```
 
-Run dev-server
+# Running locally
+Install dependencies
 ```
-npm start
+npm install
+```
+
+Run development server
+```
+npm run-script dev
+```
+Accessbile from `http://localhost:3000/`
+
+Build Production Files
+```
+npm build
 ```

@@ -20,7 +20,6 @@ class AnonChat extends Component {
     }
   
     componentDidMount = () => {
-
       
       socket = io({
         query: {
