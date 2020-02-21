@@ -13,6 +13,13 @@ Install dependencies
 npm install
 ```
 
+Create `.env` file containing:
+```
+admin=<DB password>
+secret=<Auth secret>
+```
+Replacing `<...>` as neccessary
+
 Run development server
 ```
 npm run-script dev

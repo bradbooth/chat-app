@@ -10,8 +10,6 @@ import './AuthChat.css';
 
 var socket;
 
-const ENDPOINT = `http://localhost:${process.env.REACT_APP_PORT}`
-
 class AuthChat extends Component {
 
     constructor() {

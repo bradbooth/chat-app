@@ -5,8 +5,6 @@ import Chat from './Chat'
 
 var socket;
 
-const ENDPOINT = `http://localhost:${process.env.REACT_APP_PORT}`
-
 class AnonChat extends Component {
 
     constructor() {
