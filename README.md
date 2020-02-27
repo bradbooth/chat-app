@@ -6,6 +6,10 @@
 node v13.6.0
 npm v6.13.4
 ```
+# Usage
+
+Avaliable at https://eecs-4481-chat-app.herokuapp.com/
+<br/>\* Note: Due to Heroku's free hosting tier, please allow the application at least 1 minute to start for the first time
 
 # Running locally
 Install dependencies
