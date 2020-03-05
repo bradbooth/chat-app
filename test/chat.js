@@ -3,7 +3,9 @@ const io = require("socket.io-client");
 const assert = require('assert');
 
 describe('Chat', function() {
-    
+
+    const IO_ENDPOINT = 'http://localhost:4001'
+
     var server;
     var user1;
     var user2;
@@ -11,9 +13,9 @@ describe('Chat', function() {
 
     before(function () {
         server = require('../server')
-        user1 = io('http://localhost:4001')
-        user2 = io('http://localhost:4001')
-        user3 = io('http://localhost:4001')
+        user1 = io(IO_ENDPOINT)
+        user2 = io(IO_ENDPOINT)
+        user3 = io(IO_ENDPOINT)
 
     });
     after(function () {

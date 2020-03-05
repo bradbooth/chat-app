@@ -24,18 +24,18 @@ app.use('/', routes);
 
 // TODO - Move websockets to own file
 const AUTHORIZED = 'authorized'
-const DEBUG = false;
+const DEBUG = true;
 
 let users = []
 
 const printAllUsers = () => {
-  // if (DEBUG) console.log(
-  //   "**********************  \n",
-  //   "Current users:          \n",
-  //   "Agents:", getAgents(), '\n',
-  //   "Users:",   getUsers(), '\n',
-  //   "**********************  \n"
-  // )
+  if (DEBUG) console.log(
+    "**********************  \n",
+    "Current users:          \n",
+    "Agents:", getAgents(), '\n',
+    "Users:",   getUsers(), '\n',
+    "**********************  \n"
+  )
 }
 
 const getAgents = () => {
