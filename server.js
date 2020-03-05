@@ -29,13 +29,13 @@ const DEBUG = false;
 let users = []
 
 const printAllUsers = () => {
-  if (DEBUG) console.log(
-    "**********************  \n",
-    "Current users:          \n",
-    "Agents:", getAgents(), '\n',
-    "Users:",   getUsers(), '\n',
-    "**********************  \n"
-  )
+  // if (DEBUG) console.log(
+  //   "**********************  \n",
+  //   "Current users:          \n",
+  //   "Agents:", getAgents(), '\n',
+  //   "Users:",   getUsers(), '\n',
+  //   "**********************  \n"
+  // )
 }
 
 const getAgents = () => {

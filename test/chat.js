@@ -7,20 +7,14 @@ describe('Chat', function() {
     var server;
     var user1;
     var user2;
+    var user3;
 
     before(function () {
         server = require('../server')
-        user1 = io('http://localhost:4001', {
-            query: {
-                token: ``
-            }
-        })
+        user1 = io('http://localhost:4001')
+        user2 = io('http://localhost:4001')
+        user3 = io('http://localhost:4001')
 
-        user2 = io('http://localhost:4001', {
-            query: {
-                token: ``
-            }
-        })
     });
     after(function () {
       server.close();
@@ -32,6 +26,7 @@ describe('Chat', function() {
 
         var user1ID;
         var user2ID;
+        var user3ID;
 
         it('Ensure successful connection', function() {
             this.retries(3);
@@ -60,6 +55,17 @@ describe('Chat', function() {
             })
         });
 
+        it('User3: Emitting a join request should respond with joined', function(done) {
+            user3.emit('join', {
+                username: 'testUser'
+            })
+            user3.on('joined', (id) => {
+                assert.ok(id)
+                user3ID = id
+                done()
+            })
+        });
+
         it('User1 should be able to send a message to User2', function() {
             const message = 'Hello'
             assert.ok(user1ID)
@@ -84,6 +90,22 @@ describe('Chat', function() {
             user2.on( 'receive-message' , (msg) => {
                 assert.equal(msg[1].value, message)
             })
+        });
+
+        it('User3 should not be able to send a message to User1 as User2', function(done) {
+            const message = 'Hi'
+            
+            assert.ok(user1ID)
+            assert.ok(user2ID)
+            assert.ok(user3ID)
+
+            user3.emit( 'send-message', { to: user1ID, from: user2ID, value: message } )
+
+            user1.on( 'receive-message' , (msg) => {
+                assert.ok(msg)
+            })
+
+            done()
         });
 
     });
