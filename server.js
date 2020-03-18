@@ -117,13 +117,17 @@ io.on('connection', (socket) => {
   // Error handler:
   uploader.on("error", function(error){
     // Delete file if error occurs
-    fs.unlink(error.file.pathName, (err) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-      console.log("Deleted file", error.file.pathName)
-    })
+    try {
+      fs.unlink(error.file.pathName, (err) => {
+        if (err) {
+          console.error(err)
+          return
+        }
+        console.log("Deleted file", error.file.pathName)
+      })
+    } catch ( error ){
+      console.log('Unable to delete file')
+    }
   });
 
   socket.on('join', (msg) => {
