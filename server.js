@@ -26,11 +26,12 @@ app.use('/', routes);
 
 // TODO - Move websockets to own file
 const AUTHORIZED = 'authorized'
+const DEBUG = true;
 
 let users = []
 
 const printAllUsers = () => {
-  console.log(
+  if (DEBUG) console.log(
     "**********************  \n",
     "Current users:          \n",
     "Agents:", getAgents(), '\n',
@@ -112,14 +113,14 @@ io.on('connection', (socket) => {
   uploader.listen(socket);
 
   socket.on('join', (msg) => {
-    console.log('join', msg)
+    if (DEBUG) console.log('join', msg)
     jwt.verify(
       msg.jwtToken, 
       process.env.secret, 
       (err, decoded) => {
 
       if ( err ){
-        console.log('Unauthorized')
+        if (DEBUG) console.log('Unauthorized')
         users.push({
           id: socket.id,
           assignedAgent: null,
@@ -127,7 +128,7 @@ io.on('connection', (socket) => {
           chatHistory: []
         })
       } else {
-        console.log('Authorized: ', decoded)
+        if (DEBUG) console.log('Authorized: ', decoded)
         users.push({
           username: decoded._username,
           id: socket.id,
@@ -147,7 +148,7 @@ io.on('connection', (socket) => {
   })
   
   socket.on('disconnect', (msg) => {
-    console.log('disconnect', msg)
+    if (DEBUG) console.log('disconnect', msg)
 
     const disconnectingUserId = socket.id
 
@@ -184,7 +185,7 @@ io.on('connection', (socket) => {
       value: msg.value
     }
 
-    console.log('send-message', message)
+    if (DEBUG) console.log('send-message', message)
     // Ignore incorecctly formatted messages
     if ( message.to === null || message.from === null ) return
 
@@ -206,7 +207,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('transfer-user', (msg) =>{
-    console.log('transfer-user', msg)
+    if (DEBUG) console.log('transfer-user', msg)
     // user: ... , agent: ...
 
     // Update users assigned agent
@@ -236,6 +237,8 @@ app.get('*', (req, res) => {
 });
 
 // Start server
-http.listen(port, () => {
+var server = http.listen(port, () => {
   console.log('Server is up on port ' + port);
 });
+
+module.exports = server;
