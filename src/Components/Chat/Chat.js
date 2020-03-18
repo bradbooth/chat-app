@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from "react-redux";
-import { Container, Row, Col, Spinner, Button, InputGroup } from 'react-bootstrap'
+import { Container, Row, Col, Spinner, Button } from 'react-bootstrap'
 
 import './Chat.css'; 
 
@@ -28,8 +28,7 @@ export class Chat extends React.Component {
 
         this.props.siofu
             .addEventListener("error", (data) => {
-                console.log("ERROR UPLOADING")
-                console.log(data.code)
+                console.error("Error uploading")
                 if ( data.code === 0) {
                     this.setState({
                         inProgress: false,
@@ -135,10 +134,10 @@ export class Chat extends React.Component {
 
                     <Button
                         size="sm"
-                        variant="outline-secondary"
+                        variant="secondary"
                         ref="upload" 
                         id="upload-button"
-                        // disabled={this.props.to === ''}
+                        disabled={this.props.to === ''}
                     >
                         { this.state.inProgress && 
                             <Spinner 
@@ -152,12 +151,10 @@ export class Chat extends React.Component {
                     </Button>
                     <input
                         type="file"
-                        // disabled={this.props.to === ''}
+                        disabled={this.props.to === ''}
                         onChange={this.upload}
                         ref="upload_input"
                         id="siofu_input"/>
-
-                    
                     { this.state.complete && <div>{this.state.uploadMessage}</div>}
                 </Col>
             </Row>
