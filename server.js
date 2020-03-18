@@ -9,6 +9,7 @@ const http = require('http').createServer(app)
 const io = require("socket.io")(http, { origins: '*:*'});
 const jwt = require('jsonwebtoken');
 const siofu = require("socketio-file-upload");
+const fs = require('fs')
 
 const port = process.env.PORT || 4001
 const publicPath = path.join(__dirname, 'build');
@@ -109,8 +110,21 @@ const assignAgent = () => {
 io.on('connection', (socket) => {
 
   var uploader = new siofu();
-  uploader.dir = "./";
+  uploader.maxFileSize = 10485760 // 10 mb
+  uploader.dir = "./uploads/";
   uploader.listen(socket);
+
+  // Error handler:
+  uploader.on("error", function(error){
+    // Delete file if error occurs
+    fs.unlink(error.file.pathName, (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      console.log("Deleted file", error.file.pathName)
+    })
+  });
 
   socket.on('join', (msg) => {
     if (DEBUG) console.log('join', msg)

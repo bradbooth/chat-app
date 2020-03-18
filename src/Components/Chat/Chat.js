@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from "react-redux";
-import { Container, Row, Col, Spinner } from 'react-bootstrap'
+import { Container, Row, Col, Spinner, Button, InputGroup } from 'react-bootstrap'
 
 import './Chat.css'; 
 
@@ -25,11 +25,31 @@ export class Chat extends React.Component {
 
         this.props.siofu
             .addEventListener("complete", this.uploadComplete);
+
+        this.props.siofu
+            .addEventListener("error", (data) => {
+                console.log("ERROR UPLOADING")
+                console.log(data.code)
+                if ( data.code === 0) {
+                    this.setState({
+                        inProgress: false,
+                        complete: true,
+                        uploadMessage: "Error: Max file size is 10 mb"
+                    })
+                } else {
+                    this.setState({ 
+                        inProgress: false,
+                        complete: true,
+                        uploadMessage: "Error: unable to upload file"
+                    })
+                }
+            })
     }
     
     upload = (e) => {
-        console.log(e)
-        console.log(e.target.files)
+        this.setState({
+            uploadMessage: ""
+        })
     }
 
     uploadProgress = () => ( this.setState({
@@ -39,7 +59,8 @@ export class Chat extends React.Component {
 
     uploadComplete = () => ( this.setState({
         inProgress: false,
-        complete: true
+        complete: true,
+        uploadMessage: "Upload Complete ✓"
     }))
 
     setMessage = (e) => {
@@ -112,15 +133,32 @@ export class Chat extends React.Component {
                         disabled={ this.props.to === ''}
                     />
 
-                    <button ref="upload" id="upload-button">Upload</button>
+                    <Button
+                        size="sm"
+                        variant="outline-secondary"
+                        ref="upload" 
+                        id="upload-button"
+                        // disabled={this.props.to === ''}
+                    >
+                        { this.state.inProgress && 
+                            <Spinner 
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                animation="border"/>}
+                        Upload
+                    </Button>
                     <input
                         type="file"
+                        // disabled={this.props.to === ''}
                         onChange={this.upload}
                         ref="upload_input"
                         id="siofu_input"/>
 
-                    { this.state.inProgress && <Spinner animation="border"/>}
-                    { this.state.complete && <span>Upload Complete</span>}
+                    
+                    { this.state.complete && <div>{this.state.uploadMessage}</div>}
                 </Col>
             </Row>
             </Container>
