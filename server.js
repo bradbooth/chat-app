@@ -118,6 +118,7 @@ io.on('connection', (socket) => {
   uploader.on("error", function(error){
     // Delete file if error occurs
     try {
+      console.log(error)
       fs.unlink(error.file.pathName, (err) => {
         if (err) {
           console.error(err)
