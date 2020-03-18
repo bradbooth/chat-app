@@ -8,6 +8,7 @@ const cors = require('cors')
 const http = require('http').createServer(app)
 const io = require("socket.io")(http, { origins: '*:*'});
 const jwt = require('jsonwebtoken');
+const siofu = require("socketio-file-upload");
 
 const port = process.env.PORT || 4001
 const publicPath = path.join(__dirname, 'build');
@@ -19,6 +20,7 @@ app.use(bodyParser.json())
 app.use(express.static(publicPath));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(siofu.router)
 app.use('/', routes);
 
 
@@ -104,6 +106,10 @@ const assignAgent = () => {
  * On connection to server
  */
 io.on('connection', (socket) => {
+
+  var uploader = new siofu();
+  uploader.dir = "./";
+  uploader.listen(socket);
 
   socket.on('join', (msg) => {
     console.log('join', msg)

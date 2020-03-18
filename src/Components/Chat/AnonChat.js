@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import io from "socket.io-client";
 import Chat from './Chat'
+import SocketIOFileUpload from 'socketio-file-upload';
 
 var socket;
 
@@ -13,10 +14,11 @@ class AnonChat extends Component {
       this.state = {
         chat: [],
         to: '',
-        id: ''
+        id: '',
+        siofu: new SocketIOFileUpload(io.connect())
       };
     }
-  
+
     componentDidMount = () => {
       
       socket = io({
@@ -72,6 +74,7 @@ class AnonChat extends Component {
             from={ this.state.id }
             chat={ this.state.chat }
             sendMessage={ this.sendMessage }
+            siofu={this.state.siofu}
           />
         </div>
       )

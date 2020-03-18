@@ -6,6 +6,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Chat from './Chat'
 import io from "socket.io-client";
+import SocketIOFileUpload from 'socketio-file-upload';
 import './AuthChat.css'; 
 
 var socket;
@@ -19,7 +20,8 @@ class AuthChat extends Component {
         id: null,
         users: [],
         chatHistory: [],
-        selectedUser: null
+        selectedUser: null,
+        siofu: new SocketIOFileUpload(io.connect())
       };
     }
 
@@ -192,6 +194,7 @@ class AuthChat extends Component {
                   from={ this.state.id }
                   chat={ this.getSelectedUserChatHistory() }
                   sendMessage={ this.sendMessage }
+                  siofu={this.state.siofu}
                 />
             </Col>
           </Row>

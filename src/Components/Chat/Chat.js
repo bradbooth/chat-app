@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from "react-redux";
-import { Container, Row, Col } from 'react-bootstrap'
+import { Container, Row, Col, Spinner } from 'react-bootstrap'
 
 import './Chat.css'; 
 
@@ -11,15 +11,43 @@ export class Chat extends React.Component {
         super(props);
 
         this.state = {
-            value: ''
+            value: '',
+            inProgress: false
         }
     }
+
+    componentDidMount() {
+        this.props.siofu
+            .listenOnSubmit(this.refs.upload, this.refs.upload_input);
+
+        this.props.siofu
+            .addEventListener("progress", this.uploadProgress);
+
+        this.props.siofu
+            .addEventListener("complete", this.uploadComplete);
+    }
+    
+    upload = (e) => {
+        console.log(e)
+        console.log(e.target.files)
+    }
+
+    uploadProgress = () => ( this.setState({
+        inProgress: true,
+        complete: false
+    }))
+
+    uploadComplete = () => ( this.setState({
+        inProgress: false,
+        complete: true
+    }))
 
     setMessage = (e) => {
         this.setState({
             value: e.target.value
         })
     }
+
 
     getChat = () => {
         // Only show messages relating to currently selected recipent
@@ -83,6 +111,16 @@ export class Chat extends React.Component {
                         onKeyDown={ this.sendMessage }
                         disabled={ this.props.to === ''}
                     />
+
+                    <button ref="upload" id="upload-button">Upload</button>
+                    <input
+                        type="file"
+                        onChange={this.upload}
+                        ref="upload_input"
+                        id="siofu_input"/>
+
+                    { this.state.inProgress && <Spinner animation="border"/>}
+                    { this.state.complete && <span>Upload Complete</span>}
                 </Col>
             </Row>
             </Container>
