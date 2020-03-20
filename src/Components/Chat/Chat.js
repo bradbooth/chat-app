@@ -142,7 +142,6 @@ export class Chat extends React.Component {
                         { this.state.inProgress && 
                             <Spinner 
                                 as="span"
-                                animation="border"
                                 size="sm"
                                 role="status"
                                 aria-hidden="true"

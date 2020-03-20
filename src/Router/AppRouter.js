@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { NavLink } from "react-router-dom"
 import {
   Router,
   Switch,
   Route,
 } from "react-router-dom";
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
 
 import history from '../History/History';
 import PrivateRoute from './PrivateRoute'
@@ -30,16 +31,24 @@ class AppRouter extends Component {
     const { isAuthenticated} = this.props.authentication
 
     return (
-      <Router history={history} >
+      <Router history={history} basename='/project7'>
 
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="/">EECS 4481 - Chat App</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
-              <Nav.Link href="/login">Login</Nav.Link>
-              <Nav.Link href="/signup">Sign up</Nav.Link>
-              <Nav.Link href="/chat">Chat</Nav.Link>
+              <NavItem>
+                <NavLink to="/login" className="nav-link">Login</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink to="/signup" className="nav-link">Sign up</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink to="/chat" className="nav-link">Chat</NavLink>
+              </NavItem>
+              {/* <Nav.Link href="/signup">Sign up</Nav.Link>
+              <Nav.Link href="/chat">Chat</Nav.Link> */}
               { isAuthenticated && <Nav.Link href="/authchat">Authenticated Chat</Nav.Link> }
               { isAuthenticated && <Nav.Link href="/login" onClick={this.signOut}>Sign out</Nav.Link> }
             </Nav>
