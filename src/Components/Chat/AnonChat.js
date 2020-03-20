@@ -15,13 +15,13 @@ class AnonChat extends Component {
         chat: [],
         to: '',
         id: '',
-        siofu: new SocketIOFileUpload(io.connect())
+        siofu: new SocketIOFileUpload(io('eecs-4481-chat-app.herokuapp.com'))
       };
     }
 
     componentDidMount = () => {
       
-      socket = io({
+      socket = io('eecs-4481-chat-app.herokuapp.com', {
         query: {
           token: `${this.props.auth.jwtToken}`
         }

@@ -21,7 +21,7 @@ class AuthChat extends Component {
         users: [],
         chatHistory: [],
         selectedUser: null,
-        siofu: new SocketIOFileUpload(io.connect())
+        siofu: new SocketIOFileUpload(io('eecs-4481-chat-app.herokuapp.com'))
       };
     }
 
@@ -31,7 +31,7 @@ class AuthChat extends Component {
   
     componentDidMount = () => {
 
-      socket = io({
+      socket = io('eecs-4481-chat-app.herokuapp.com', {
         query: {
           token: `${this.props.auth.jwtToken}`
         }
