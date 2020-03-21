@@ -28,7 +28,7 @@ export class Login extends Component {
 
     submit = (e) => {
         if ( e.key === 'Enter' ){
-            axios.post('/api/login', {
+            axios.post('https://eecs-4481-chat-app.herokuapp.com/api/login', {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {

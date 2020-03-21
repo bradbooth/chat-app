@@ -25,8 +25,7 @@ export class SignUp extends Component {
 
     submit = (e) => {
         if ( e.key === 'Enter' ){
-            console.log('submitting')
-            axios.post('/api/createUser', {
+            axios.post('https://eecs-4481-chat-app.herokuapp.com/api/createUser', {
                 username: this.state.username,
                 password: this.state.password
             }).then( res => {

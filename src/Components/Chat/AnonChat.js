@@ -28,14 +28,12 @@ class AnonChat extends Component {
       })
 
       socket.on( 'receive-message' , (msg) => {
-        console.log('receive-message', msg)
         this.setState({
           chat: [ ...msg ]
         })
       })
 
       socket.on( 'assigned-agent' , (id) => {
-        console.log('assigned-agent', id)
         this.setState({
           to: id,
         })
@@ -46,7 +44,6 @@ class AnonChat extends Component {
       })
       
       socket.on('joined', (id) => {
-        console.log(`Your id is ${id}`)
         this.setState({
           id: id
         })

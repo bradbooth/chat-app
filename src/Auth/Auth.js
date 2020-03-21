@@ -13,7 +13,7 @@ class Auth {
 
         console.log("Checking Authorization...")
 
-        this.authenticatedRequest('/api/authenticated').then( ( res ) => {
+        this.authenticatedRequest('https://eecs-4481-chat-app.herokuapp.com/api/authenticated').then( ( res ) => {
 
         if (res.status === 200 ){
             store.dispatch(setAuthenticated(true))

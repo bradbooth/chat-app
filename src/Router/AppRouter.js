@@ -49,8 +49,8 @@ class AppRouter extends Component {
               </NavItem>
               {/* <Nav.Link href="/signup">Sign up</Nav.Link>
               <Nav.Link href="/chat">Chat</Nav.Link> */}
-              { isAuthenticated && <Nav.Link href="/authchat">Authenticated Chat</Nav.Link> }
-              { isAuthenticated && <Nav.Link href="/login" onClick={this.signOut}>Sign out</Nav.Link> }
+              { isAuthenticated && <NavItem><NavLink to="/authchat" className="nav-link">Authenticated Chat</NavLink></NavItem>}
+              { isAuthenticated && <NavItem><NavLink to="/login" className="nav-link" onClick={this.signOut}>Sign out</NavLink></NavItem> }
             </Nav>
           </Navbar.Collapse>
         </Navbar>

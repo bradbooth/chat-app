@@ -43,14 +43,12 @@ class AuthChat extends Component {
       })
 
       socket.on('joined', (id) => {
-        console.log(`Your id is ${id}`)
         this.setState({
           id: id,
         })
       })
 
       socket.on('update-users', (msg) => {
-        console.log('update-users', msg)
         this.setState({
           users: msg.users
         })
@@ -93,7 +91,6 @@ class AuthChat extends Component {
     }
 
     setSelectedUser = (e, user) => {
-      console.log('setSelectedUser', user)
       this.setState({
         selectedUser: user.id
       })
@@ -102,7 +99,6 @@ class AuthChat extends Component {
     /** Get the chat history corresponding to the selected user */
     getSelectedUserChatHistory = () => {
       const selectedUser = this.state.users.find( user => user.id === this.state.selectedUser)
-      console.log('getSelectedUserChatHistory', selectedUser)
       if ( selectedUser ){
 
         // If its an agent talking to an agent then only show their messages
@@ -125,7 +121,6 @@ class AuthChat extends Component {
 
       const user = data.target.innerText
       const agent = data.id
-      console.log("transfer ", user, "to", agent)
 
       socket.emit('transfer-user', {
         user: user,

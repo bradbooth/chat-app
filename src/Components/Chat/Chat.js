@@ -104,7 +104,6 @@ export class Chat extends React.Component {
                 value: this.state.value
             }
 
-            console.log('Sending message:', message)
             this.props.sendMessage(message)
             this.setState({
                 value: ''
